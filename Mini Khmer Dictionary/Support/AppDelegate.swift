@@ -14,6 +14,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private let model = DictionaryModel()
     private let popover = NSPopover()
     private var statusItem: NSStatusItem?
+    /// Installed only while the popover is open, so the rest of the system
+    /// keeps its keys.
+    private var keyMonitor: Any?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
@@ -30,6 +33,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private func configurePopover() {
         popover.behavior = .transient
         popover.animates = true
+        popover.delegate = self
         popover.contentSize = NSSize(width: 380, height: 520)
         popover.contentViewController = NSHostingController(
             rootView: DictionaryPopoverView(model: model)
@@ -75,15 +79,63 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private func showPopover() {
         guard let button = statusItem?.button else { return }
 
-        NSApp.activate()
+        NSApp.activate(ignoringOtherApps: true)
         popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
         // The hosting window has to be key before SwiftUI will accept focus.
         popover.contentViewController?.view.window?.makeKey()
         model.requestSearchFocus()
+        startKeyMonitor()
     }
 
     private func hidePopover() {
         popover.performClose(nil)
+    }
+
+    // MARK: - Keyboard
+
+    /// Arrow keys and ⏎ have to be caught before the search field sees them —
+    /// a single-line text field swallows Up and Down for its own cursor
+    /// movement, so `onKeyPress` on an ancestor never runs. A local monitor
+    /// gets first refusal on the event instead.
+    private func startKeyMonitor() {
+        guard keyMonitor == nil else { return }
+        keyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
+            // Only the Bool crosses back out: NSEvent is not Sendable.
+            let consumed = MainActor.assumeIsolated { () -> Bool in
+                guard let self, self.popover.isShown else { return false }
+                return self.handleKeyDown(event)
+            }
+            return consumed ? nil : event
+        }
+    }
+
+    private func stopKeyMonitor() {
+        if let keyMonitor {
+            NSEvent.removeMonitor(keyMonitor)
+        }
+        keyMonitor = nil
+    }
+
+    /// Returns `true` when the key was consumed.
+    private func handleKeyDown(_ event: NSEvent) -> Bool {
+        switch event.keyCode {
+        case 126:  // up arrow
+            model.moveSelection(by: -1)
+        case 125:  // down arrow
+            model.moveSelection(by: 1)
+        case 36, 76:  // return, keypad enter
+            model.copySelection(includeDefinition: event.modifierFlags.contains(.command))
+        case 53:  // escape clears the query, then closes
+            if model.query.isEmpty {
+                hidePopover()
+            } else {
+                model.clearQuery()
+                model.requestSearchFocus()
+            }
+        default:
+            return false
+        }
+        return true
     }
 
     private func showContextMenu() {
@@ -109,5 +161,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     @objc private func openFromMenu() {
         showPopover()
+    }
+}
+
+extension AppDelegate: NSPopoverDelegate {
+    /// The popover also closes by clicking away, which never routes through
+    /// `hidePopover()`.
+    func popoverDidClose(_ notification: Notification) {
+        stopKeyMonitor()
     }
 }

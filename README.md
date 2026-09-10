@@ -7,6 +7,8 @@ pane; copying is always explicit.
 Search accepts Khmer script or Latin letters — `bong` finds បង, `domlai` and
 `tomlai` both find តម្លៃ.
 
+Requires macOS 13 or later.
+
 ## Building
 
 The SQLite database the app ships is generated from `Data/khmer_dict.csv`, and

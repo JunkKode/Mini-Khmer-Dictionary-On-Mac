@@ -4,6 +4,7 @@
 //
 
 import AppKit
+import Combine
 import SwiftUI
 
 /// Transient confirmation shown after something is put on the pasteboard.
@@ -18,26 +19,28 @@ struct CopyNotice: Equatable, Identifiable {
 /// The view owns no state of its own beyond focus: search text, results,
 /// selection, paging and copy feedback all live here so the popover can be torn
 /// down and rebuilt without losing the user's place.
+///
+/// This is an `ObservableObject` rather than `@Observable` because the app
+/// deploys back to macOS 13, and the Observation framework starts at 14.
 @MainActor
-@Observable
-final class DictionaryModel {
+final class DictionaryModel: ObservableObject {
     /// Text in the search field. The view debounces changes before searching.
-    var query: String = ""
+    @Published var query: String = ""
 
-    private(set) var entries: [DictionaryEntry] = []
-    private(set) var senses: [DictionarySense] = []
-    private(set) var totalCount: Int = 0
-    private(set) var isSearching = false
-    private(set) var reachedEnd = false
-    private(set) var failureMessage: String?
-    private(set) var copyNotice: CopyNotice?
+    @Published private(set) var entries: [DictionaryEntry] = []
+    @Published private(set) var senses: [DictionarySense] = []
+    @Published private(set) var totalCount: Int = 0
+    @Published private(set) var isSearching = false
+    @Published private(set) var reachedEnd = false
+    @Published private(set) var failureMessage: String?
+    @Published private(set) var copyNotice: CopyNotice?
 
     /// Bumped whenever the search field should take focus again — the popover
     /// view is reused across openings, so `onAppear` alone is not enough.
-    private(set) var focusRequest = 0
+    @Published private(set) var focusRequest = 0
 
     /// Identifier of the highlighted row.
-    var selection: DictionaryEntry.ID?
+    @Published var selection: DictionaryEntry.ID?
 
     /// `true` while the query is Latin text being matched phonetically.
     var isRomanizedQuery: Bool {
@@ -170,7 +173,14 @@ final class DictionaryModel {
         pasteboard.setString(text, forType: .string)
 
         copyNotice = notice
-        AccessibilityNotification.Announcement("Copied \(notice.word)").post()
+        NSAccessibility.post(
+            element: NSApp as Any,
+            notification: .announcementRequested,
+            userInfo: [
+                .announcement: "Copied \(notice.word)",
+                .priority: NSAccessibilityPriorityLevel.high.rawValue,
+            ]
+        )
 
         copyResetTask?.cancel()
         copyResetTask = Task {

@@ -84,7 +84,13 @@ private extension View {
         if #available(macOS 15.0, *) {
             self.pointerStyle(.columnResize)
         } else {
-            self
+            self.onHover { inside in
+                if inside {
+                    NSCursor.resizeLeftRight.set()
+                } else {
+                    NSCursor.arrow.set()
+                }
+            }
         }
     }
 }

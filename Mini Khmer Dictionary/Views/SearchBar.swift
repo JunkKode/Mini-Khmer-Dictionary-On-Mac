@@ -10,7 +10,6 @@ struct SearchBar: View {
     @Binding var query: String
     @FocusState.Binding var isFocused: Bool
     let isSearching: Bool
-    let onSubmit: () -> Void
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -24,7 +23,6 @@ struct SearchBar: View {
                 .textFieldStyle(.plain)
                 .font(.system(size: 15))
                 .focused($isFocused)
-                .onSubmit(onSubmit)
                 .accessibilityLabel("Search the Khmer dictionary")
                 .accessibilityHint("Type Khmer text, then press Return to copy the highlighted word")
 
@@ -49,7 +47,7 @@ struct SearchBar: View {
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 10)
-        .animation(reduceMotion ? nil : .snappy(duration: 0.18), value: query.isEmpty)
-        .animation(reduceMotion ? nil : .snappy(duration: 0.18), value: isSearching)
+        .animation(reduceMotion ? nil : .easeOut(duration: 0.18), value: query.isEmpty)
+        .animation(reduceMotion ? nil : .easeOut(duration: 0.18), value: isSearching)
     }
 }

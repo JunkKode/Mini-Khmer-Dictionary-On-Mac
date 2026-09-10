@@ -7,7 +7,7 @@ import SwiftUI
 
 /// The whole popover: search field, results, and the status bar underneath.
 struct DictionaryPopoverView: View {
-    @Bindable var model: DictionaryModel
+    @ObservedObject var model: DictionaryModel
 
     @Environment(\.dismissPopover) private var dismissPopover
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -25,7 +25,7 @@ struct DictionaryPopoverView: View {
     }
 
     private var animation: Animation? {
-        reduceMotion ? nil : .snappy(duration: 0.22)
+        reduceMotion ? nil : .easeOut(duration: 0.22)
     }
 
     var body: some View {
@@ -33,8 +33,7 @@ struct DictionaryPopoverView: View {
             SearchBar(
                 query: $model.query,
                 isFocused: $searchFieldIsFocused,
-                isSearching: model.isSearching,
-                onSubmit: { model.copySelection(includeDefinition: false) }
+                isSearching: model.isSearching
             )
 
             Divider()
@@ -71,7 +70,7 @@ struct DictionaryPopoverView: View {
             )
         }
         .frame(width: Self.popoverWidth, height: 500)
-        .background(.background)
+        .background(Color(nsColor: .windowBackgroundColor))
         .animation(animation, value: model.copyNotice)
         .animation(animation, value: model.selection)
         .task(id: model.query) {
@@ -83,31 +82,8 @@ struct DictionaryPopoverView: View {
         .task(id: model.selection) {
             await model.loadSenses()
         }
-        .onChange(of: model.focusRequest, initial: true) {
+        .task(id: model.focusRequest) {
             searchFieldIsFocused = true
-        }
-        .onKeyPress(.upArrow) {
-            model.moveSelection(by: -1)
-            return .handled
-        }
-        .onKeyPress(.downArrow) {
-            model.moveSelection(by: 1)
-            return .handled
-        }
-        .onKeyPress(.escape) {
-            if model.query.isEmpty {
-                dismissPopover()
-            } else {
-                model.clearQuery()
-                searchFieldIsFocused = true
-            }
-            return .handled
-        }
-        .onKeyPress(keys: [.return]) { press in
-            // Plain ⏎ is handled by the search field's onSubmit.
-            guard press.modifiers.contains(.command) else { return .ignored }
-            model.copySelection(includeDefinition: true)
-            return .handled
         }
     }
 
@@ -116,11 +92,11 @@ struct DictionaryPopoverView: View {
     @ViewBuilder
     private var results: some View {
         if let failure = model.failureMessage {
-            ContentUnavailableView {
-                Label("Dictionary unavailable", systemImage: "exclamationmark.triangle")
-            } description: {
-                Text(failure)
-            }
+            EmptyStateView(
+                title: "Dictionary unavailable",
+                systemImage: "exclamationmark.triangle",
+                message: failure
+            )
         } else if model.entries.isEmpty {
             if model.isSearching {
                 ProgressView()
@@ -128,13 +104,17 @@ struct DictionaryPopoverView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .accessibilityLabel("Searching")
             } else if model.query.isEmpty {
-                ContentUnavailableView(
-                    "No words loaded",
+                EmptyStateView(
+                    title: "No words loaded",
                     systemImage: "character.book.closed",
-                    description: Text("The dictionary database appears to be empty.")
+                    message: "The dictionary database appears to be empty."
                 )
             } else {
-                ContentUnavailableView.search(text: model.query)
+                EmptyStateView(
+                    title: "No matches",
+                    systemImage: "magnifyingglass",
+                    message: "Nothing in the dictionary matches “\(model.query)”."
+                )
             }
         } else {
             entryList
@@ -161,10 +141,10 @@ struct DictionaryPopoverView: View {
                 .padding(.vertical, 6)
             }
             .scrollIndicators(.automatic)
-            .onChange(of: model.selection) { _, newValue in
-                guard let newValue else { return }
+            .task(id: model.selection) {
+                guard let selection = model.selection else { return }
                 withAnimation(animation) {
-                    proxy.scrollTo(newValue, anchor: .center)
+                    proxy.scrollTo(selection, anchor: .center)
                 }
             }
         }
