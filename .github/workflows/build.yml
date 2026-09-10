@@ -1,0 +1,56 @@
+name: Build
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+
+# A newer push to the same branch makes an in-flight build pointless.
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select the newest Xcode on the runner
+        run: |
+          ls -d /Applications/Xcode*.app
+          sudo xcode-select -s "$(ls -d /Applications/Xcode*.app | sort -V | tail -1)"
+          xcodebuild -version
+
+      # The database is a build product, so it is not in the repository.
+      - name: Generate the dictionary database
+        run: python3 Tools/build_dictionary_db.py
+
+      # Signing identities do not exist on a hosted runner, and this job only
+      # needs to prove the app compiles. Signing belongs in a release job.
+      - name: Build
+        run: |
+          xcodebuild build \
+            -project "Mini Khmer Dictionary.xcodeproj" \
+            -scheme "Mini Khmer Dictionary" \
+            -configuration Release \
+            -destination 'platform=macOS' \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            DEVELOPMENT_TEAM=""
+
+      - name: Package the app
+        run: |
+          ditto -c -k --keepParent \
+            "build/Build/Products/Release/Mini Khmer Dictionary.app" \
+            "Mini Khmer Dictionary.zip"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Mini-Khmer-Dictionary
+          path: Mini Khmer Dictionary.zip
+          if-no-files-found: error
