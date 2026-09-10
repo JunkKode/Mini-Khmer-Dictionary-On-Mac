@@ -1,0 +1,64 @@
+name: Release
+
+# Push a tag to cut a release:  git tag v1.1.0 && git push origin v1.1.0
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select the newest Xcode on the runner
+        run: |
+          sudo xcode-select -s "$(ls -d /Applications/Xcode*.app | sort -V | tail -1)"
+          xcodebuild -version
+
+      - name: Generate the dictionary database
+        run: python3 Tools/build_dictionary_db.py
+
+      # The tag is the version, so the app and the disk image cannot disagree.
+      - name: Build
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          xcodebuild build \
+            -project "Mini Khmer Dictionary.xcodeproj" \
+            -scheme "Mini Khmer Dictionary" \
+            -configuration Release \
+            -destination 'platform=macOS' \
+            -derivedDataPath build \
+            MARKETING_VERSION="$VERSION" \
+            CURRENT_PROJECT_VERSION="${{ github.run_number }}" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            DEVELOPMENT_TEAM=""
+
+      - name: Package the disk image
+        run: Tools/make_dmg.sh "build/Build/Products/Release/Mini Khmer Dictionary.app"
+
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cat > notes.md <<'NOTES'
+          Open the disk image and drag **Mini Khmer Dictionary** to Applications.
+          The app lives in the menu bar; there is no Dock icon.
+
+          ### First launch
+
+          This build is not signed with an Apple Developer ID, so macOS will
+          refuse to open it on the first try. Right-click the app in Applications,
+          choose **Open**, and confirm. macOS remembers the choice.
+          NOTES
+
+          gh release create "$GITHUB_REF_NAME" \
+            --title "Mini Khmer Dictionary ${GITHUB_REF_NAME#v}" \
+            --notes-file notes.md \
+            Mini-Khmer-Dictionary-*.dmg

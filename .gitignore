@@ -24,3 +24,6 @@ __pycache__/
 
 # Generated from Data/khmer_dict.csv — rebuild with Tools/build_dictionary_db.py
 Mini Khmer Dictionary/Resources/khmer_dict.sqlite3
+
+# Disk images built by Tools/make_dmg.sh
+*.dmg
