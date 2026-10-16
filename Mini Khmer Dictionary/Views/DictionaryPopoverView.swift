@@ -5,7 +5,8 @@
 
 import SwiftUI
 
-/// The whole popover: search field, results, and the status bar underneath.
+/// The Look Up half of the popover: search field, results, and the status bar
+/// underneath.
 struct DictionaryPopoverView: View {
     @ObservedObject var model: DictionaryModel
 
@@ -69,8 +70,8 @@ struct DictionaryPopoverView: View {
                 hasSelection: model.selection != nil
             )
         }
-        .frame(width: Self.popoverWidth, height: 500)
-        .background(Color(nsColor: .windowBackgroundColor))
+        .frame(width: Self.popoverWidth)
+        .frame(maxHeight: .infinity)
         .animation(animation, value: model.copyNotice)
         .animation(animation, value: model.selection)
         .task(id: model.query) {
@@ -125,6 +126,14 @@ struct DictionaryPopoverView: View {
         ScrollViewReader { proxy in
             ScrollView {
                 LazyVStack(spacing: 2) {
+                    if model.isShowingSimilar {
+                        Text("No exact match — did you mean:")
+                            .font(.system(size: 11))
+                            .foregroundStyle(.secondary)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                    }
                     ForEach(model.entries) { entry in
                         EntryRowView(
                             entry: entry,

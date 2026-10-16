@@ -81,7 +81,7 @@ nonisolated enum RomanizedSearch {
     /// Levenshtein distance, or `nil` once it is certain to exceed `limit`.
     /// Bounding matters: this runs against every headword that matched, and
     /// callers only care about small distances anyway.
-    static func distance(_ lhs: [UInt8], _ rhs: [UInt8], limit: Int) -> Int? {
+    static func distance<Element: Equatable>(_ lhs: [Element], _ rhs: [Element], limit: Int) -> Int? {
         if abs(lhs.count - rhs.count) > limit { return nil }
         if lhs.isEmpty { return rhs.count <= limit ? rhs.count : nil }
         if rhs.isEmpty { return lhs.count <= limit ? lhs.count : nil }

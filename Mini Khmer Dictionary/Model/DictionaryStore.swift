@@ -38,6 +38,9 @@ actor DictionaryStore {
     /// Romanization data for every headword, loaded once the first romanized
     /// query arrives and then kept for the life of the app (a few MB).
     private var romanIndex: RomanIndex?
+    /// Every headword, arranged for spell checking. Built on the first check
+    /// (about 0.2 s) and then kept, like `romanIndex`.
+    private var spellChecker: KhmerSpellChecker?
 
     init() throws {
         guard let url = Bundle.main.url(forResource: "khmer_dict", withExtension: "sqlite3") else {
@@ -200,6 +203,54 @@ actor DictionaryStore {
             byID[entry.id] = entry
         }
         return ids.compactMap { byID[Int($0)] }
+    }
+
+    // MARK: - Spell checking
+
+    /// Problems in `text`, in reading order. `learned` holds the user's own
+    /// additions to the dictionary.
+    func spellingIssues(in text: String, learned: Set<String>) throws -> [SpellingIssue] {
+        try loadSpellChecker().issues(in: text, learned: learned)
+    }
+
+    /// Headwords that `query` was probably meant to be — sound-alike and
+    /// look-alike spellings first — for when a Khmer search finds nothing.
+    func similarEntries(to query: String, limit: Int) throws -> [DictionaryEntry] {
+        let words = try loadSpellChecker().suggestions(for: query, limit: limit)
+        guard !words.isEmpty else { return [] }
+
+        let placeholders = Array(repeating: "?", count: words.count).joined(separator: ",")
+        let statement = try prepare(
+            "SELECT \(Self.entryColumns) FROM entries WHERE word IN (\(placeholders)) ORDER BY ord"
+        )
+        defer { sqlite3_finalize(statement) }
+        for (offset, word) in words.enumerated() {
+            bind(statement, Int32(offset + 1), word)
+        }
+
+        // One row per word (the first in printed order), in suggestion order.
+        var byWord: [String: DictionaryEntry] = [:]
+        for entry in rows(from: statement, reserving: words.count) where !byWord.keys.contains(entry.word) {
+            byWord[entry.word] = entry
+        }
+        return words.compactMap { byWord[$0] }
+    }
+
+    private func loadSpellChecker() throws -> KhmerSpellChecker {
+        if let spellChecker { return spellChecker }
+
+        let statement = try prepare("SELECT word, freq FROM entries")
+        defer { sqlite3_finalize(statement) }
+
+        var headwords: [(String, Int32)] = []
+        headwords.reserveCapacity(42_000)
+        while sqlite3_step(statement) == SQLITE_ROW {
+            headwords.append((text(statement, 0), sqlite3_column_int(statement, 1)))
+        }
+
+        let checker = KhmerSpellChecker(headwords: headwords)
+        spellChecker = checker
+        return checker
     }
 
     /// The numbered meanings of a single entry, decoded on demand.
