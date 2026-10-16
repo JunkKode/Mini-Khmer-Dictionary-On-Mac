@@ -7,6 +7,12 @@ import AppKit
 import Combine
 import SwiftUI
 
+/// Which half of the popover is showing.
+enum PopoverMode: Hashable {
+    case lookUp
+    case check
+}
+
 /// Transient confirmation shown after something is put on the pasteboard.
 struct CopyNotice: Equatable, Identifiable {
     let id = UUID()
@@ -24,6 +30,10 @@ struct CopyNotice: Equatable, Identifiable {
 /// deploys back to macOS 13, and the Observation framework starts at 14.
 @MainActor
 final class DictionaryModel: ObservableObject {
+    /// Look-up or spell check. Lives here because the key handling in
+    /// `AppDelegate` needs it as much as the view does.
+    @Published var mode: PopoverMode = .lookUp
+
     /// Text in the search field. The view debounces changes before searching.
     @Published var query: String = ""
 
@@ -32,6 +42,9 @@ final class DictionaryModel: ObservableObject {
     @Published private(set) var totalCount: Int = 0
     @Published private(set) var isSearching = false
     @Published private(set) var reachedEnd = false
+    /// `true` when nothing matched and `entries` holds similar spellings
+    /// instead (ផ្ទាងផ្ទាត់ → ផ្ទៀងផ្ទាត់).
+    @Published private(set) var isShowingSimilar = false
     @Published private(set) var failureMessage: String?
     @Published private(set) var copyNotice: CopyNotice?
 
@@ -57,6 +70,14 @@ final class DictionaryModel: ObservableObject {
     private var isPaging = false
     private var copyResetTask: Task<Void, Never>?
 
+    init() {
+        Task {
+            if let store = openStore() {
+                await SpotlightManager.shared.indexDatabaseIfNeeded(store: store)
+            }
+        }
+    }
+
     // MARK: - Loading
 
     /// Runs the current query from the top. Called by the view once the user
@@ -69,10 +90,17 @@ final class DictionaryModel: ObservableObject {
         defer { isSearching = false }
 
         do {
-            let page = try await store.entries(matching: requested, limit: pageSize, offset: 0)
+            var page = try await store.entries(matching: requested, limit: pageSize, offset: 0)
+            var similar = false
+            let trimmed = requested.trimmingCharacters(in: .whitespacesAndNewlines)
+            if page.isEmpty, !trimmed.isEmpty, !RomanizedSearch.isRomanized(trimmed) {
+                page = try await store.similarEntries(to: trimmed, limit: 20)
+                similar = !page.isEmpty
+            }
             guard requested == query else { return }  // a newer keystroke already won
             entries = page
-            reachedEnd = page.count < pageSize
+            isShowingSimilar = similar
+            reachedEnd = similar || page.count < pageSize
             selection = page.first?.id
             failureMessage = nil
             if totalCount == 0 {
@@ -80,6 +108,7 @@ final class DictionaryModel: ObservableObject {
             }
         } catch {
             entries = []
+            isShowingSimilar = false
             selection = nil
             reachedEnd = true
             failureMessage = error.localizedDescription
@@ -149,6 +178,13 @@ final class DictionaryModel: ObservableObject {
         focusRequest += 1
     }
 
+    /// Switches to look-up with `word` in the search field.
+    func lookUp(_ word: String) {
+        mode = .lookUp
+        query = word
+        requestSearchFocus()
+    }
+
     // MARK: - Copying
 
     /// Copies a word. Copying is always explicit — selecting a row never
@@ -192,7 +228,8 @@ final class DictionaryModel: ObservableObject {
 
     // MARK: - Store
 
-    private func openStore() -> DictionaryStore? {
+    /// The one open database, shared with `SpellCheckModel`.
+    func openStore() -> DictionaryStore? {
         if let store { return store }
         do {
             let opened = try DictionaryStore()

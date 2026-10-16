@@ -7,6 +7,22 @@ pane; copying is always explicit.
 Search accepts Khmer script or Latin letters — `bong` finds បង, `domlai` and
 `tomlai` both find តម្លៃ.
 
+## Spell checking
+
+The **Check Spelling** tab (⌘2) checks Khmer text against the dictionary. Khmer
+has no spaces between words, so each run of text is first split into the fewest
+dictionary words that cover it, and whatever can't be covered is flagged.
+Problems are underlined in red (not in the dictionary) or orange (typed in a
+non-standard order, or a variant such as ្ត for ្ដ), with suggestions.
+
+To check text in another app, select it and choose **Services › Check Khmer
+Spelling** from the app menu or the right-click menu. **Look Up in Khmer
+Dictionary** works the same way. You can give either one a keyboard shortcut in
+System Settings › Keyboard › Keyboard Shortcuts › Services.
+
+The engine is `Model/KhmerSpellChecker.swift`. Words added with "Add to
+Dictionary" are stored in user defaults under `learnedWords`.
+
 Requires macOS 13 or later.
 
 ## Building
