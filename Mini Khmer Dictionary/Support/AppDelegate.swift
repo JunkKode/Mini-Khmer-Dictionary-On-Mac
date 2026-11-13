@@ -16,6 +16,7 @@ import SwiftUI
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private let model = DictionaryModel()
     private lazy var checker = SpellCheckModel(openStore: { [model] in model.openStore() })
+    private let calculator = CalculatorModel()
     private let popover = NSPopover()
     private var statusItem: NSStatusItem?
     /// Installed only while the popover is open, so the rest of the system
@@ -74,7 +75,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         popover.delegate = self
         popover.contentSize = NSSize(width: 380, height: 520)
         popover.contentViewController = NSHostingController(
-            rootView: PopoverRootView(dictionary: model, checker: checker)
+            rootView: PopoverRootView(dictionary: model, checker: checker, calculator: calculator)
                 .environment(\.dismissPopover, DismissPopoverAction { [weak self] in
                     self?.hidePopover()
                 })
@@ -82,21 +83,97 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func configureStatusItem() {
-        let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
-        item.button?.image = NSImage(
-            systemSymbolName: "character.book.closed",
-            accessibilityDescription: "Mini Khmer Dictionary"
+        let item = NSStatusBar.system.statusItem(
+            withLength: NSStatusItem.variableLength
         )
-        item.button?.image?.isTemplate = true
-        item.button?.target = self
-        item.button?.action = #selector(statusItemClicked)
-        item.button?.sendAction(on: [.leftMouseUp, .rightMouseUp])
-        item.button?.setAccessibilityLabel("Mini Khmer Dictionary")
-        item.button?.toolTip = "Mini Khmer Dictionary"
+
+        if let button = item.button {
+            if let rawImage = NSImage(named: "icon") {
+                // Convert opaque white background pixels and inner details into proper
+                // alpha transparency so macOS template rendering doesn't draw a solid block,
+                // OR render it as a properly sized icon.
+                let menuIcon = prepareMenuBarIcon(from: rawImage)
+                button.image = menuIcon
+            } else {
+                // Fallback native template icon if "icon" asset is missing
+                button.image = makeFallbackTemplateIcon()
+            }
+
+            button.imagePosition = .imageOnly
+            button.imageScaling = .scaleProportionallyDown
+            button.target = self
+            button.action = #selector(statusItemClicked)
+            button.sendAction(on: [.leftMouseUp, .rightMouseUp])
+
+            button.setAccessibilityLabel("Mini Khmer Dictionary")
+            button.toolTip = "Mini Khmer Dictionary"
+        }
+
         statusItem = item
     }
 
-    // MARK: - Presentation
+    /// Processes the custom `icon` asset so it displays cleanly in the macOS menu bar:
+    /// 1. Resizes the image to fit the 20x20 pt macOS status bar height.
+    /// 2. Sets `isTemplate = false` if the image relies on dark/light RGB contrast
+    ///    (since `isTemplate = true` discards all RGB colors and turns any opaque shape solid white).
+    private func prepareMenuBarIcon(from source: NSImage) -> NSImage {
+        let targetSize = NSSize(width: 20, height: 20)
+        let resized = NSImage(size: targetSize)
+
+        resized.lockFocus()
+        NSGraphicsContext.current?.imageInterpolation = .high
+        source.draw(
+            in: NSRect(origin: .zero, size: targetSize),
+            from: NSRect(origin: .zero, size: source.size),
+            operation: .copy,
+            fraction: 1.0
+        )
+        resized.unlockFocus()
+
+        // IMPORTANT:
+        // Keep `isTemplate = false` when using a multi-shade PNG (like white book + black "Mini" text).
+        // If `isTemplate = true` is set, macOS ignores RGB colors and fills every non-transparent pixel
+        // with solid white!
+        // (Also make sure "Render As" in Xcode's Assets.xcassets for "icon" is set to "Original Image",
+        // NOT "Template Image".)
+        resized.isTemplate = false
+        return resized
+    }
+
+    /// Optional helper: Draws a crisp monochrome template icon with transparent cutouts
+    /// that automatically adapts to both Light Mode and Dark Mode menu bars.
+    private func makeFallbackTemplateIcon() -> NSImage {
+        let size = NSSize(width: 22, height: 18)
+        let image = NSImage(size: size, flipped: false) { rect in
+            // Draw book silhouette
+            let bookRect = NSRect(x: 1, y: 2, width: 20, height: 14)
+            let path = NSBezierPath(roundedRect: bookRect, xRadius: 3, yRadius: 3)
+            NSColor.black.setFill()
+            path.fill()
+
+            // Punch out transparent "ក" on the left and lines on the right using .destinationOut
+            NSGraphicsContext.current?.compositingOperation = .destinationOut
+
+            let paragraph = NSMutableParagraphStyle()
+            paragraph.alignment = .center
+            let attrs: [NSAttributedString.Key: Any] = [
+                .font: NSFont.boldSystemFont(ofSize: 11),
+                .foregroundColor: NSColor.black,
+                .paragraphStyle: paragraph
+            ]
+            NSString(string: "ក").draw(in: NSRect(x: 2, y: 2, width: 10, height: 13), withAttributes: attrs)
+
+            for row in 0..<3 {
+                let y = CGFloat(5 + row * 3)
+                let line = NSBezierPath(roundedRect: NSRect(x: 12.5, y: y, width: 6, height: 1.4), xRadius: 0.7, yRadius: 0.7)
+                line.fill()
+            }
+
+            return true
+        }
+        image.isTemplate = true
+        return image
+    }
 
     @objc private func statusItemClicked() {
         if NSApp.currentEvent?.type == .rightMouseUp {
@@ -124,6 +201,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         switch model.mode {
         case .lookUp: model.requestSearchFocus()
         case .check: checker.requestFocus()
+        case .calculate: calculator.requestFocus()
         }
         startKeyMonitor()
     }
@@ -167,8 +245,22 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         case 19 where command:  // ⌘2
             model.mode = .check
             return true
+        case 20 where command:  // ⌘3
+            model.mode = .calculate
+            calculator.requestFocus()
+            return true
         default:
             break
+        }
+
+        // The calculator routes its own keys; Escape clears it step by step
+        // before it closes the popover.
+        if model.mode == .calculate {
+            if event.keyCode == 53 {  // escape
+                if !calculator.handleEscape() { hidePopover() }
+                return true
+            }
+            return calculator.handleKeyDown(event)
         }
 
         // The spell checker's editor needs arrows and Return for itself.
@@ -212,6 +304,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             action: #selector(checkSpellingFromMenu),
             keyEquivalent: ""
         ).target = self
+        menu.addItem(
+            withTitle: "Calculator…",
+            action: #selector(calculatorFromMenu),
+            keyEquivalent: ""
+        ).target = self
         menu.addItem(.separator())
 
         if #available(macOS 13.0, *) {
@@ -244,6 +341,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     @objc private func checkSpellingFromMenu() {
         model.mode = .check
+        showPopover()
+    }
+
+    @objc private func calculatorFromMenu() {
+        model.mode = .calculate
         showPopover()
     }
 
@@ -294,8 +396,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 }
 
 extension AppDelegate: NSPopoverDelegate {
-    /// The popover also closes by clicking away, which never routes through
-    /// `hidePopover()`.
     func popoverDidClose(_ notification: Notification) {
         stopKeyMonitor()
     }
@@ -319,8 +419,6 @@ final class GlobalHotkeyManager {
     func register() {
         let hotKeyID = EventHotKeyID(signature: 0x4D484B44, id: 1) // "MHKD"
         var hotKeyRef: EventHotKeyRef?
-        // kVK_Space = 49
-        // optionKey = 2048
         RegisterEventHotKey(UInt32(49), UInt32(2048), hotKeyID, GetApplicationEventTarget(), 0, &hotKeyRef)
     }
 }
@@ -331,9 +429,6 @@ actor SpotlightManager {
     static let shared = SpotlightManager()
     
     func indexDatabaseIfNeeded(store: DictionaryStore) async {
-        // Core Spotlight's native tokenizer has bugs with Khmer prefixes (e.g. typing សួស failing to match សួស្ដី).
-        // It also doesn't allow limiting to 2-3 results. 
-        // We will clear the index so it doesn't spam the user's macOS Spotlight.
         do {
             try await CSSearchableIndex.default().deleteAllSearchableItems()
         } catch {

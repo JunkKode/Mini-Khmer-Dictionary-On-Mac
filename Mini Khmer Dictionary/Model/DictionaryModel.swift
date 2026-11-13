@@ -7,10 +7,11 @@ import AppKit
 import Combine
 import SwiftUI
 
-/// Which half of the popover is showing.
+/// Which part of the popover is showing.
 enum PopoverMode: Hashable {
     case lookUp
     case check
+    case calculate
 }
 
 /// Transient confirmation shown after something is put on the pasteboard.

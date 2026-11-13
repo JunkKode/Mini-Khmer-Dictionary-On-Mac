@@ -60,7 +60,7 @@ struct StatusBar: View {
 }
 
 /// A keycap plus its meaning, e.g. ⏎ Copy.
-private struct KeyHint: View {
+struct KeyHint: View {
     let keys: String
     let label: String
 

@@ -5,22 +5,25 @@
 
 import SwiftUI
 
-/// Switches the popover between looking words up and checking text.
+/// Switches the popover between looking words up, checking text and
+/// calculating.
 struct PopoverRootView: View {
     @ObservedObject var dictionary: DictionaryModel
     @ObservedObject var checker: SpellCheckModel
+    @ObservedObject var calculator: CalculatorModel
 
     var body: some View {
         VStack(spacing: 0) {
             Picker("Mode", selection: $dictionary.mode) {
                 Text("Look Up").tag(PopoverMode.lookUp)
                 Text("Check Spelling").tag(PopoverMode.check)
+                Text("Calculator").tag(PopoverMode.calculate)
             }
             .pickerStyle(.segmented)
             .labelsHidden()
             .fixedSize()
             .padding(.vertical, 7)
-            .help("⌘1 Look Up · ⌘2 Check Spelling")
+            .help("⌘1 Look Up · ⌘2 Check Spelling · ⌘3 Calculator")
 
             Divider()
 
@@ -29,6 +32,8 @@ struct PopoverRootView: View {
                 DictionaryPopoverView(model: dictionary)
             case .check:
                 SpellCheckView(model: checker, onLookUp: dictionary.lookUp)
+            case .calculate:
+                CalculatorView(model: calculator)
             }
         }
         .frame(width: 620, height: 540)
