@@ -18,6 +18,10 @@ indirect enum FormulaExpression: Equatable {
     case percent(FormulaExpression)
     /// `range` covers the function name, for error reporting.
     case call(name: String, arguments: [FormulaExpression], range: Range<Int>)
+    /// A cell such as `B2`. Only the Grid can supply its value.
+    case reference(CellAddress, range: Range<Int>)
+    /// `A1:B5`, only meaningful as an argument of a function like `SUM`.
+    case cellRange(CellAddress, CellAddress, range: Range<Int>)
 }
 
 /// Recursive-descent parser. Precedence, loosest first:
@@ -29,7 +33,7 @@ indirect enum FormulaExpression: Equatable {
 ///     unary        -x  +x          (so -2^2 is -4, as in mathematics)
 ///     power        ^               (right-associative: 2^3^2 is 2^9)
 ///     postfix      x%
-///     primary      number  "text"  TRUE  NAME(args)  (expr)
+///     primary      number  "text"  TRUE  NAME(args)  A1  A1:B5  (expr)
 struct FormulaParser {
     /// Deeper nesting than this is almost certainly a mistake, and refusing it
     /// keeps a pathological input from exhausting the stack.
@@ -161,6 +165,9 @@ struct FormulaParser {
             if case .leftParen = current?.kind {
                 return try parseCall(name: name, nameRange: token.range)
             }
+            if let address = CellAddress(name) {
+                return try parseReference(address, at: token.range)
+            }
             switch name.uppercased() {
             case "TRUE": return .boolean(true)
             case "FALSE": return .boolean(false)
@@ -183,6 +190,20 @@ struct FormulaParser {
         default:
             throw unexpected(token)
         }
+    }
+
+    /// `B2`, or `B2:C5` when a colon follows.
+    private mutating func parseReference(_ start: CellAddress, at startRange: Range<Int>) throws -> FormulaExpression {
+        guard case .colon = current?.kind else { return .reference(start, range: startRange) }
+        position += 1
+        guard let next = current else {
+            throw FormulaError(.incomplete, "A range needs an end cell, like A1:A5.", range: sourceLength..<sourceLength)
+        }
+        guard case .identifier(let name) = next.kind, let end = CellAddress(name) else {
+            throw FormulaError(.syntax, "A range needs a cell after “:”, like A1:A5.", range: next.range)
+        }
+        position += 1
+        return .cellRange(start, end, range: startRange.lowerBound..<next.range.upperBound)
     }
 
     private mutating func parseCall(name: String, nameRange: Range<Int>) throws -> FormulaExpression {
@@ -249,6 +270,8 @@ struct FormulaParser {
             return FormulaError(.syntax, "There's a “)” without a matching “(”.", range: token.range)
         case .separator:
             return FormulaError(.syntax, "Commas only separate function arguments.", range: token.range)
+        case .colon:
+            return FormulaError(.syntax, "“:” goes between two cells, like A1:A5.", range: token.range)
         case .formulaPrefix:
             return FormulaError(.syntax, "Unexpected “=”.", range: token.range)
         case .op(let op):
@@ -279,6 +302,10 @@ extension FormulaExpression {
             return operand.printed(within: precedence) + "%"
         case .call(let name, let arguments, _):
             return name + "(" + arguments.map(\.canonicalText).joined(separator: ", ") + ")"
+        case .reference(let address, _):
+            return address.name
+        case .cellRange(let start, let end, _):
+            return start.name + ":" + end.name
         case .binary(let op, let left, let right):
             let rightAssociative = op == .power
             let leftText = left.printed(within: precedence, strictly: rightAssociative)
@@ -289,7 +316,7 @@ extension FormulaExpression {
 
     private var precedence: Int {
         switch self {
-        case .number, .text, .boolean, .call: 8
+        case .number, .text, .boolean, .call, .reference, .cellRange: 8
         case .percent: 7
         case .negate: 5
         case .binary(let op, _, _):

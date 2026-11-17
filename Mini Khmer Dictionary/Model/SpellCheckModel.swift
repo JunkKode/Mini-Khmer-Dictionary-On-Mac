@@ -27,6 +27,15 @@ final class SpellCheckModel: ObservableObject {
     /// Bumped whenever the editor should take focus again.
     @Published private(set) var focusRequest = 0
 
+    /// Words offered for what is being typed, or for what comes next.
+    @Published private(set) var completion: KhmerCompleter.Completion?
+    /// Where the editor should put its caret after a completion.
+    @Published private(set) var caretRequest = CaretRequest()
+    /// The caret (no selection) as last reported by the editor.
+    private var caret: Int?
+    private var completionTask: Task<Void, Never>?
+    private var completionDismissed = false
+
     var selectedIssue: SpellingIssue? {
         guard let selection else { return nil }
         return issues.first { $0.id == selection }
@@ -71,7 +80,13 @@ final class SpellCheckModel: ObservableObject {
         defer { isChecking = false }
 
         do {
-            let found = try await store.spellingIssues(in: requested, learned: learned)
+            // The check itself runs off the store's actor: a long text can
+            // take seconds, and lookups mustn't queue behind it.
+            let checker = try await store.spellCheckerForChecking()
+            let learnedWords = learned
+            let found = await Task.detached(priority: .userInitiated) {
+                checker.issues(in: requested, learned: learnedWords)
+            }.value
             guard requested == text else { return }  // typing moved on
             issues = found.filter { !ignored.contains($0.word) }
             checkedText = requested
@@ -94,6 +109,55 @@ final class SpellCheckModel: ObservableObject {
 
     func requestFocus() {
         focusRequest += 1
+    }
+
+    // MARK: - Completion
+
+    /// The editor reports every caret move. A collapsed caret right after
+    /// Khmer text, or after a space following it, gets completions.
+    func caretDidMove(to selection: NSRange, in currentText: String) {
+        guard selection.length == 0, selection.location > 0 else {
+            caret = nil
+            completion = nil
+            return
+        }
+        if caret != selection.location { completionDismissed = false }
+        caret = selection.location
+        guard !completionDismissed else { return }
+
+        let before = (currentText as NSString).substring(to: min(selection.location, (currentText as NSString).length))
+        completionTask?.cancel()
+        completionTask = Task { [weak self] in
+            guard let store = self?.openStore(),
+                  let checker = try? await store.spellCheckerForChecking() else { return }
+            let found = await Task.detached(priority: .userInitiated) { checker.completions(before: before) }.value
+            guard !Task.isCancelled, let self, self.caret == selection.location, self.text == currentText else { return }
+            self.completion = found ?? nil
+        }
+    }
+
+    /// Tab, or a click on a suggestion: puts `word` in place of what was
+    /// typed so far.
+    func acceptCompletion(_ chosen: String? = nil) {
+        guard let completion, let caret, let word = chosen ?? completion.words.first else { return }
+        let source = text as NSString
+        let start = max(0, caret - completion.replacing)
+        guard caret <= source.length else { return }
+        text = source.replacingCharacters(in: NSRange(location: start, length: caret - start), with: word)
+        let location = start + (word as NSString).length
+        self.caret = location
+        self.completion = nil
+        caretRequest = CaretRequest(id: caretRequest.id + 1, location: location)
+        requestFocus()
+    }
+
+    /// Escape hides the suggestions until the caret moves. Returns whether
+    /// there were any.
+    func dismissCompletion() -> Bool {
+        guard completion != nil else { return false }
+        completion = nil
+        completionDismissed = true
+        return true
     }
 
     // MARK: - Fixing

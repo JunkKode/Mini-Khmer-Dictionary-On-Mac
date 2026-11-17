@@ -8,7 +8,7 @@ import SwiftUI
 /// Brief confirmation that floats over the list after a copy.
 struct CopyToastView: View {
     let notice: CopyNotice
-
+    
     var body: some View {
         HStack(spacing: 6) {
             Image(systemName: "checkmark.circle.fill")

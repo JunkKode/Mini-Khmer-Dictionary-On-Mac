@@ -13,9 +13,12 @@ import Foundation
 struct FormulaFunction {
     enum Category: String, CaseIterable {
         case math = "Math"
+        case percentage = "Percentage"
         case logical = "Logical"
         case text = "Text"
         case date = "Date"
+        case khmer = "Khmer"
+        case finance = "Money"
     }
 
     let name: String
@@ -73,10 +76,13 @@ struct FormulaFunction {
 struct FormulaArguments {
     let functionName: String
     private let thunks: [() throws -> FormulaValue]
+    /// Which arguments came from a cell range rather than being written out.
+    private let fromRange: [Bool]
 
-    init(functionName: String, thunks: [() throws -> FormulaValue]) {
+    init(functionName: String, thunks: [() throws -> FormulaValue], fromRange: [Bool]? = nil) {
         self.functionName = functionName
         self.thunks = thunks
+        self.fromRange = fromRange ?? Array(repeating: false, count: thunks.count)
     }
 
     var count: Int { thunks.count }
@@ -97,6 +103,15 @@ struct FormulaArguments {
         try value(index).asText
     }
 
+    /// A rate as a fraction. A percentage is used as it is and a plain number
+    /// is read as percentage points, so `15%` and `15` both mean fifteen
+    /// percent (and `0.15` means 0.15%).
+    func rate(_ index: Int) throws -> Double {
+        let raw = try value(index)
+        if case .percent(let fraction) = raw { return fraction }
+        return try raw.asNumber(context: functionName) / 100
+    }
+
     /// A whole number argument such as ROUND's digits.
     func integer(_ index: Int, name: String) throws -> Int {
         let raw = try number(index)
@@ -110,8 +125,14 @@ struct FormulaArguments {
         try thunks.map { try $0() }
     }
 
+    /// Every argument as a number. Text that came from a range is skipped,
+    /// so a column's heading doesn't break SUM(A1:A10).
     func allNumbers() throws -> [Double] {
-        try allValues().map { try $0.asNumber(context: functionName) }
+        try thunks.indices.compactMap { index in
+            let value = try thunks[index]()
+            if fromRange[index], case .text = value { return nil }
+            return try value.asNumber(context: functionName)
+        }
     }
 }
 
@@ -176,7 +197,9 @@ struct FormulaFunctionRegistry {
 
 extension FormulaFunctionRegistry {
     /// The functions the calculator ships with.
-    static let standard = FormulaFunctionRegistry(mathFunctions + logicalFunctions + otherFunctions)
+    static let standard = FormulaFunctionRegistry(
+        mathFunctions + percentageFunctions + logicalFunctions + otherFunctions + khmerFunctions
+    )
 
     private static let mathFunctions: [FormulaFunction] = [
         FormulaFunction(
@@ -190,19 +213,22 @@ extension FormulaFunctionRegistry {
             summary: "The arithmetic mean of its arguments.", example: "AVERAGE(10, 20, 30)"
         ) { args in
             let numbers = try args.allNumbers()
+            guard !numbers.isEmpty else {
+                throw FormulaError(.divisionByZero, "AVERAGE has no numbers to average.")
+            }
             return .number(numbers.reduce(0, +) / Double(numbers.count))
         },
         FormulaFunction(
             "MIN", category: .math, parameters: ["number1"], variadic: true,
             summary: "The smallest of its arguments.", example: "MIN(10, 50, 100)"
         ) { args in
-            .number(try args.allNumbers().min()!)
+            .number(try args.allNumbers().min() ?? 0)  // an empty range gives 0
         },
         FormulaFunction(
             "MAX", category: .math, parameters: ["number1"], variadic: true,
             summary: "The largest of its arguments.", example: "MAX(10, 50, 100)"
         ) { args in
-            .number(try args.allNumbers().max()!)
+            .number(try args.allNumbers().max() ?? 0)
         },
         FormulaFunction(
             "COUNT", category: .math, parameters: ["value1"], variadic: true,
@@ -210,7 +236,7 @@ extension FormulaFunctionRegistry {
         ) { args in
             let numeric = try args.allValues().filter {
                 switch $0 {
-                case .number, .date: true
+                case .number, .percent, .date: true
                 default: false
                 }
             }
@@ -220,25 +246,27 @@ extension FormulaFunctionRegistry {
             "ROUND", category: .math, parameters: ["number", "[digits]"],
             summary: "Rounds to a number of decimal places, halves away from zero.", example: "ROUND(123.456, 2)"
         ) { args in
-            .number(try FormulaRounding.round(args.number(0), digits: args.count > 1 ? args.integer(1, name: "digits") : 0, rule: .plain))
+            try FormulaRounding.round(args, rule: .plain)
         },
         FormulaFunction(
             "ROUNDUP", category: .math, parameters: ["number", "[digits]"],
             summary: "Rounds away from zero.", example: "ROUNDUP(3.141, 2)"
         ) { args in
-            .number(try FormulaRounding.round(args.number(0), digits: args.count > 1 ? args.integer(1, name: "digits") : 0, rule: .up))
+            try FormulaRounding.round(args, rule: .up)
         },
         FormulaFunction(
             "ROUNDDOWN", category: .math, parameters: ["number", "[digits]"],
             summary: "Rounds toward zero.", example: "ROUNDDOWN(3.149, 2)"
         ) { args in
-            .number(try FormulaRounding.round(args.number(0), digits: args.count > 1 ? args.integer(1, name: "digits") : 0, rule: .down))
+            try FormulaRounding.round(args, rule: .down)
         },
         FormulaFunction(
             "ABS", category: .math, parameters: ["number"],
             summary: "The number without its sign.", example: "ABS(-100)"
         ) { args in
-            .number(abs(try args.number(0)))
+            let value = try args.value(0)
+            if case .percent(let fraction) = value { return .percent(abs(fraction)) }
+            return .number(abs(try value.asNumber(context: args.functionName)))
         },
         FormulaFunction(
             "POWER", category: .math, parameters: ["number", "power"],
@@ -271,6 +299,57 @@ extension FormulaFunctionRegistry {
             summary: "π to 15 digits.", example: "PI() * 2^2"
         ) { _ in
             .number(Double.pi)
+        },
+    ]
+
+    /// Everyday percentage sums. Each rate may be written `15%` or `15`.
+    private static let percentageFunctions: [FormulaFunction] = [
+        FormulaFunction(
+            "PERCENTOF", category: .percentage, parameters: ["rate", "amount"],
+            summary: "That percentage of an amount: 15% of 2000 is 300.", example: "PERCENTOF(15%, 2000)"
+        ) { args in
+            .number(try args.number(1) * args.rate(0))
+        },
+        FormulaFunction(
+            "DISCOUNT", category: .percentage, parameters: ["amount", "rate"],
+            summary: "The amount after taking a percentage off.", example: "DISCOUNT(2000, 15%)"
+        ) { args in
+            let amount = try args.number(0), rate = try args.rate(1)
+            guard rate >= 0 else {
+                throw FormulaError(.number, "DISCOUNT's rate can't be negative. Use ADDPERCENT to add to an amount.")
+            }
+            guard rate <= 1 else {
+                throw FormulaError(.number, "A discount can't be more than 100%.")
+            }
+            return .number(amount - amount * rate)
+        },
+        FormulaFunction(
+            "ADDPERCENT", category: .percentage, parameters: ["amount", "rate"],
+            summary: "The amount plus a percentage, e.g. tax or markup.", example: "ADDPERCENT(2000, 10%)"
+        ) { args in
+            let amount = try args.number(0)
+            return .number(amount + amount * (try args.rate(1)))
+        },
+        FormulaFunction(
+            "PERCENTAGE", category: .percentage, parameters: ["part", "whole"],
+            summary: "What percentage the part is of the whole: 300 of 2000 is 15%.", example: "PERCENTAGE(300, 2000)"
+        ) { args in
+            let part = try args.number(0), whole = try args.number(1)
+            guard whole != 0 else {
+                throw FormulaError(.divisionByZero, "PERCENTAGE can't take a percentage of zero.")
+            }
+            return .percent(part / whole)
+        },
+        FormulaFunction(
+            "PERCENTCHANGE", category: .percentage, parameters: ["old", "new"],
+            summary: "How much a value rose or fell, as a percentage of where it started.",
+            example: "PERCENTCHANGE(1500, 1800)"
+        ) { args in
+            let old = try args.number(0), new = try args.number(1)
+            guard old != 0 else {
+                throw FormulaError(.divisionByZero, "PERCENTCHANGE can't measure a change from zero.")
+            }
+            return .percent((new - old) / abs(old))
         },
     ]
 
@@ -350,6 +429,17 @@ enum FormulaArithmetic {
 
 enum FormulaRounding {
     enum Rule { case plain, up, down }
+
+    /// ROUND, ROUNDUP and ROUNDDOWN. A percentage is rounded as it reads, so
+    /// `ROUND(PERCENTAGE(1, 3), 2)` is 33.33%, and stays a percentage.
+    static func round(_ args: FormulaArguments, rule: Rule) throws -> FormulaValue {
+        let value = try args.value(0)
+        let digits = args.count > 1 ? try args.integer(1, name: "digits") : 0
+        if case .percent(let fraction) = value {
+            return .percent(try round(fraction * 100, digits: digits, rule: rule) / 100)
+        }
+        return .number(try round(value.asNumber(context: args.functionName), digits: digits, rule: rule))
+    }
 
     /// Rounds in decimal rather than binary, so `ROUND(1.005, 2)` is 1.01 the
     /// way a person (and Excel) expects, not 1.00.

@@ -27,3 +27,7 @@ Mini Khmer Dictionary/Resources/khmer_dict.sqlite3
 
 # Disk images built by Tools/make_dmg.sh
 *.dmg
+
+# The corpus and its prediction database (~700 MB). Only its distilled output,
+# Data/khmer_corpus.tsv, belongs in the repository.
+khmer-text-data/

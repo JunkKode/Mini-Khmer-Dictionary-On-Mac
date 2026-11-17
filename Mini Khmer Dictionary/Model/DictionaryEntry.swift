@@ -21,6 +21,21 @@ struct DictionaryEntry: Identifiable, Hashable, Sendable {
     let roman: String
     /// `true` for compound words (`t_level` 2) that hang off a simpler headword.
     let isCompound: Bool
+    /// Uses in a 40M-word corpus of modern Khmer text (1 for a word seen only
+    /// in the dictionary's own definitions, 0 for one never seen at all).
+    var frequency: Int32 = 0
+
+    /// How common the word is today, in words.
+    var usage: (label: String, level: Int) {
+        switch frequency {
+        case 20_000...: ("Very common", 4)
+        case 2_000...: ("Common", 3)
+        case 200...: ("Everyday", 2)
+        case 20...: ("Uncommon", 1)
+        case 2...: ("Rare", 0)
+        default: ("Literary", 0)
+        }
+    }
 }
 
 /// A numbered meaning of a headword.

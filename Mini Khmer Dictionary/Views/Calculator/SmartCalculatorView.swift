@@ -17,6 +17,8 @@ struct SmartCalculatorView: View {
         "=SUM(100, 200, 300)",
         "=ROUND(125.678 * 1.15, 2)",
         "=IF(100 > 50, \"Pass\", \"Fail\")",
+        "=DISCOUNT(2000, 15%)",
+        "=PERCENTAGE(300, 2000)",
         "1500 - 15%",
     ]
 
@@ -73,7 +75,7 @@ struct SmartCalculatorView: View {
     private var hintBar: some View {
         HStack(spacing: 8) {
             if let hint = model.signature, let function = model.functions.function(named: hint.functionName) {
-                signatureText(function, argument: hint.argumentIndex)
+                function.signatureText(activeArgument: hint.argumentIndex)
                     .font(.system(size: 12, design: .monospaced))
                     .lineLimit(1)
                     .layoutPriority(1)
@@ -96,20 +98,6 @@ struct SmartCalculatorView: View {
         .padding(.horizontal, 12)
         .frame(height: 26)
         .background(Color.primary.opacity(0.035))
-    }
-
-    /// `ROUND(number, digits)` with the argument being typed in bold.
-    private func signatureText(_ function: FormulaFunction, argument: Int) -> Text {
-        let active = function.parameterIndex(forArgument: argument)
-        var text = Text(function.name).foregroundColor(.purple).bold() + Text("(").foregroundColor(.secondary)
-        for (index, parameter) in function.parameters.enumerated() {
-            if index > 0 { text = text + Text(", ").foregroundColor(.secondary) }
-            text = text + (index == active
-                ? Text(parameter).bold().foregroundColor(.accentColor)
-                : Text(parameter).foregroundColor(.secondary))
-        }
-        if function.isVariadic { text = text + Text(", …").foregroundColor(.secondary) }
-        return text + Text(")").foregroundColor(.secondary)
     }
 
     // MARK: - Result
@@ -201,6 +189,10 @@ struct SmartCalculatorView: View {
                 }
             }
 
+            if !isStale, let words = KhmerWordsLine.words(for: value) {
+                KhmerWordsLine(words: words, onCopy: model.copy)
+            }
+
             if let note {
                 Label(note, systemImage: "ellipsis.circle")
                     .font(.system(size: 11))
@@ -258,25 +250,12 @@ struct SmartCalculatorView: View {
     @ViewBuilder
     private var completionList: some View {
         if let completion = model.completion {
-            VStack(alignment: .leading, spacing: 1) {
-                ForEach(Array(completion.names.enumerated()), id: \.element) { index, name in
-                    if let function = model.functions.function(named: name) {
-                        CompletionRow(
-                            function: function,
-                            isSelected: index == model.completionIndex,
-                            onChoose: { model.acceptCompletion(name) }
-                        )
-                    }
-                }
-            }
-            .padding(4)
-            .frame(width: 330)
-            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: 8, style: .continuous)
-                    .strokeBorder(Color.primary.opacity(0.1))
+            FormulaCompletionList(
+                completion: completion,
+                selectedIndex: model.completionIndex,
+                functions: model.functions,
+                onChoose: { model.acceptCompletion($0) }
             )
-            .shadow(color: .black.opacity(0.15), radius: 8, y: 3)
             .padding(.leading, 10)
             .padding(.top, 4)
             .transition(.opacity)
@@ -308,11 +287,20 @@ struct SmartCalculatorView: View {
 
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 4) {
-                    ForEach(["SUM", "AVERAGE", "ROUND", "IF", "MAX", "MIN", "SQRT", "MOD"], id: \.self) { name in
+                    ForEach(["SUM", "ROUND", "IF", "DISCOUNT", "PERCENTOF", "PERCENTAGE", "AVERAGE", "MAX", "MIN"], id: \.self) { name in
                         Button(name) { model.insertFunction(name) }
                             .buttonStyle(FunctionChipStyle())
                             .help(model.functions.function(named: name)?.summary ?? name)
                     }
+                }
+                .padding(.trailing, 16)
+            }
+            // Fade the last chip out so a cut-off one reads as "scroll for more".
+            .mask {
+                HStack(spacing: 0) {
+                    Color.black
+                    LinearGradient(colors: [.black, .clear], startPoint: .leading, endPoint: .trailing)
+                        .frame(width: 24)
                 }
             }
         }
@@ -323,36 +311,6 @@ struct SmartCalculatorView: View {
 }
 
 // MARK: - Rows
-
-private struct CompletionRow: View {
-    let function: FormulaFunction
-    let isSelected: Bool
-    let onChoose: () -> Void
-
-    var body: some View {
-        Button(action: onChoose) {
-            VStack(alignment: .leading, spacing: 2) {
-                Text(function.signature)
-                    .font(.system(size: 12, weight: .medium, design: .monospaced))
-                    .foregroundStyle(isSelected ? Color.white : Color.primary)
-                Text(function.summary)
-                    .font(.system(size: 10))
-                    .foregroundStyle(isSelected ? Color.white.opacity(0.85) : Color.secondary)
-                    .lineLimit(1)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, 8)
-            .padding(.vertical, 4)
-            .background(
-                RoundedRectangle(cornerRadius: 5, style: .continuous)
-                    .fill(isSelected ? Color.accentColor : .clear)
-            )
-            .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
-        .accessibilityAddTraits(isSelected ? [.isSelected] : [])
-    }
-}
 
 private struct ExampleRow: View {
     let text: String
@@ -396,5 +354,39 @@ private struct FunctionChipStyle: ButtonStyle {
                 RoundedRectangle(cornerRadius: 4, style: .continuous)
                     .fill(Color.purple.opacity(configuration.isPressed ? 0.2 : 0.1))
             )
+    }
+}
+
+/// The result in Khmer words, under the number, with its own copy button.
+struct KhmerWordsLine: View {
+    let words: String
+    let onCopy: (String) -> Void
+
+    /// Words for a numeric result that is worth saying: not a date, a
+    /// percentage or a huge number.
+    static func words(for value: FormulaValue) -> String? {
+        guard case .number(let number) = value, abs(number) < 1e12 else { return nil }
+        return KhmerNumbers.words(for: number, fractionDigits: 4)
+    }
+
+    var body: some View {
+        HStack(spacing: 6) {
+            Text(words)
+                .font(.system(size: 13))
+                .foregroundStyle(.secondary)
+                .lineLimit(2)
+                .truncationMode(.middle)
+                .textSelection(.enabled)
+            Button {
+                onCopy(words)
+            } label: {
+                Image(systemName: "doc.on.doc")
+                    .font(.system(size: 10))
+            }
+            .buttonStyle(.borderless)
+            .foregroundStyle(.secondary)
+            .help("Copy in Khmer words")
+            .accessibilityLabel("Copy in Khmer words")
+        }
     }
 }

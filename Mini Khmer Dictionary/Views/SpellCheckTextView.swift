@@ -13,7 +13,12 @@ struct SpellCheckTextView: NSViewRepresentable {
     let issues: [SpellingIssue]
     let selection: SpellingIssue.ID?
     let focusRequest: Int
+    var caretRequest = CaretRequest()
+    /// Whether Tab should accept a completion instead of typing a tab.
+    var hasCompletion = false
     let onSelectIssue: (SpellingIssue.ID) -> Void
+    var onCaretMove: (NSRange, String) -> Void = { _, _ in }
+    var onAcceptCompletion: () -> Void = {}
 
     func makeCoordinator() -> Coordinator {
         Coordinator(parent: self)
@@ -60,6 +65,13 @@ struct SpellCheckTextView: NSViewRepresentable {
 
         highlight(textView)
 
+        if coordinator.caretRequest != caretRequest.id {
+            coordinator.caretRequest = caretRequest.id
+            let length = (textView.string as NSString).length
+            textView.setSelectedRange(NSRange(location: min(caretRequest.location, length), length: 0))
+            textView.scrollRangeToVisible(textView.selectedRange())
+        }
+
         if coordinator.focusRequest != focusRequest {
             coordinator.focusRequest = focusRequest
             DispatchQueue.main.async {
@@ -101,6 +113,7 @@ struct SpellCheckTextView: NSViewRepresentable {
     final class Coordinator: NSObject, NSTextViewDelegate {
         var parent: SpellCheckTextView
         var focusRequest = -1
+        var caretRequest = 0
         var revealedSelection: SpellingIssue.ID?
 
         init(parent: SpellCheckTextView) {
@@ -110,12 +123,25 @@ struct SpellCheckTextView: NSViewRepresentable {
         func textDidChange(_ notification: Notification) {
             guard let textView = notification.object as? NSTextView else { return }
             parent.text = textView.string
+            // The selection notice can come before the text is published;
+            // report the caret again now that both agree.
+            parent.onCaretMove(textView.selectedRange(), textView.string)
+        }
+
+        /// Tab accepts the first suggestion while there is one.
+        func textView(_ textView: NSTextView, doCommandBy selector: Selector) -> Bool {
+            if selector == #selector(NSResponder.insertTab(_:)), parent.hasCompletion {
+                parent.onAcceptCompletion()
+                return true
+            }
+            return false
         }
 
         /// Clicking into an underlined word selects its issue.
         func textViewDidChangeSelection(_ notification: Notification) {
-            guard let textView = notification.object as? NSTextView,
-                  textView.string == parent.text else { return }
+            guard let textView = notification.object as? NSTextView else { return }
+            parent.onCaretMove(textView.selectedRange(), textView.string)
+            guard textView.string == parent.text else { return }
             let caret = textView.selectedRange().location
             if let issue = parent.issues.first(where: { NSLocationInRange(caret, $0.range) || NSMaxRange($0.range) == caret }),
                issue.id != parent.selection {

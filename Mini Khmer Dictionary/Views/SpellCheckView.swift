@@ -21,10 +21,19 @@ struct SpellCheckView: View {
                 issues: model.currentIssues,
                 selection: model.selection,
                 focusRequest: model.focusRequest,
-                onSelectIssue: { model.selection = $0 }
+                caretRequest: model.caretRequest,
+                hasCompletion: model.completion != nil,
+                onSelectIssue: { model.selection = $0 },
+                onCaretMove: { model.caretDidMove(to: $0, in: $1) },
+                onAcceptCompletion: { model.acceptCompletion() }
             )
             .overlay(alignment: .topLeading) { placeholder }
             .frame(height: 190)
+
+            if let completion = model.completion {
+                CompletionStrip(completion: completion, onChoose: { model.acceptCompletion($0) })
+                    .transition(.opacity)
+            }
 
             Divider()
 
@@ -48,6 +57,7 @@ struct SpellCheckView: View {
             footer
         }
         .animation(reduceMotion ? nil : .easeOut(duration: 0.18), value: model.selection)
+        .animation(reduceMotion ? nil : .easeOut(duration: 0.12), value: model.completion)
         .task(id: model.text) {
             try? await Task.sleep(for: .milliseconds(300))
             guard !Task.isCancelled else { return }
@@ -321,5 +331,52 @@ private struct SuggestionButton: View {
                 .fill(Color.primary.opacity(isHovering ? 0.09 : 0.05))
         )
         .onHover { isHovering = $0 }
+    }
+}
+
+/// Suggestions for the word being typed (or the next word), under the
+/// editor. Tab takes the first; a click takes any.
+private struct CompletionStrip: View {
+    let completion: KhmerCompleter.Completion
+    let onChoose: (String) -> Void
+
+    var body: some View {
+        HStack(spacing: 6) {
+            Image(systemName: completion.isPrediction ? "text.append" : "text.cursor")
+                .font(.system(size: 10))
+                .foregroundStyle(.tertiary)
+                .help(completion.isPrediction ? "Words that often come next" : "Finish the word you're typing")
+            ForEach(Array(completion.words.enumerated()), id: \.offset) { index, word in
+                Button {
+                    onChoose(word)
+                } label: {
+                    HStack(spacing: 4) {
+                        Text(word).font(.system(size: 14))
+                        if index == 0 {
+                            Text("⇥")
+                                .font(.system(size: 9, weight: .semibold))
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 3)
+                    .background(
+                        RoundedRectangle(cornerRadius: 6, style: .continuous)
+                            .fill(index == 0 ? Color.accentColor.opacity(0.14) : Color.primary.opacity(0.06))
+                    )
+                }
+                .buttonStyle(.plain)
+                .help(index == 0 ? "Tab to insert" : "Click to insert")
+            }
+            Spacer(minLength: 0)
+            Text("esc to hide")
+                .font(.system(size: 10))
+                .foregroundStyle(.tertiary)
+        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 5)
+        .background(Color.primary.opacity(0.03))
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("Word suggestions")
     }
 }

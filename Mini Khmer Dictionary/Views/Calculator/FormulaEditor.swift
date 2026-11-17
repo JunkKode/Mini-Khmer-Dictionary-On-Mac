@@ -19,12 +19,22 @@ struct FormulaEditor: NSViewRepresentable {
     let functions: FormulaFunctionRegistry
     let onChange: (String, NSRange) -> Void
     let onCommand: (FormulaEditorCommand) -> Bool
+    /// Bumped to take the keyboard away from the editor, e.g. when a Grid
+    /// cell is committed.
+    var blurRequest = 0
+    /// Tighter insets for the Grid's one-line formula bar.
+    var compact = false
+    /// The Grid's bar only takes the keyboard when a cell is being edited.
+    var focusOnAppear = true
 
     static let font = NSFont.monospacedSystemFont(ofSize: 16, weight: .regular)
     private static let functionFont = NSFont.monospacedSystemFont(ofSize: 16, weight: .semibold)
 
     func makeCoordinator() -> Coordinator {
-        Coordinator(parent: self)
+        let coordinator = Coordinator(parent: self)
+        coordinator.blurRequest = blurRequest
+        if !focusOnAppear { coordinator.focusRequest = focusRequest }
+        return coordinator
     }
 
     func makeNSView(context: Context) -> NSScrollView {
@@ -41,7 +51,7 @@ struct FormulaEditor: NSViewRepresentable {
         textView.drawsBackground = false
         textView.font = Self.font
         textView.typingAttributes = [.font: Self.font, .foregroundColor: NSColor.labelColor]
-        textView.textContainerInset = NSSize(width: 10, height: 12)
+        textView.textContainerInset = compact ? NSSize(width: 6, height: 7) : NSSize(width: 10, height: 12)
         textView.isContinuousSpellCheckingEnabled = false
         textView.isGrammarCheckingEnabled = false
         textView.isAutomaticSpellingCorrectionEnabled = false
@@ -78,6 +88,15 @@ struct FormulaEditor: NSViewRepresentable {
             let location = min(caretRequest.location, (textView.string as NSString).length)
             textView.setSelectedRange(NSRange(location: location, length: 0))
             textView.scrollRangeToVisible(textView.selectedRange())
+        }
+
+        if coordinator.blurRequest != blurRequest {
+            coordinator.blurRequest = blurRequest
+            DispatchQueue.main.async {
+                if textView.window?.firstResponder === textView {
+                    textView.window?.makeFirstResponder(nil)
+                }
+            }
         }
 
         if coordinator.focusRequest != focusRequest {
@@ -119,12 +138,14 @@ struct FormulaEditor: NSViewRepresentable {
                 if isCall, functions.function(named: name) != nil {
                     attributes[.foregroundColor] = NSColor.systemPurple
                     attributes[.font] = Self.functionFont
+                } else if !isCall, CellAddress(name) != nil {
+                    attributes[.foregroundColor] = NSColor.systemTeal
                 } else if ["TRUE", "FALSE"].contains(name.uppercased()) {
                     attributes[.foregroundColor] = NSColor.systemPink
                 } else {
                     attributes[.foregroundColor] = NSColor.labelColor
                 }
-            case .op, .separator:
+            case .op, .separator, .colon:
                 attributes[.foregroundColor] = NSColor.secondaryLabelColor
             case .leftParen, .rightParen:
                 attributes[.foregroundColor] = NSColor.tertiaryLabelColor
@@ -152,6 +173,7 @@ struct FormulaEditor: NSViewRepresentable {
     final class Coordinator: NSObject, NSTextViewDelegate {
         var parent: FormulaEditor
         var focusRequest = -1
+        var blurRequest = 0
         var caretRequest = CaretRequest(id: -1)
         var isUpdating = false
 
@@ -168,7 +190,10 @@ struct FormulaEditor: NSViewRepresentable {
         }
 
         private func report(_ notification: Notification) {
-            guard !isUpdating, let textView = notification.object as? NSTextView else { return }
+            // Only the user's own typing and clicking count; that always
+            // happens with the editor holding the keyboard.
+            guard !isUpdating, let textView = notification.object as? NSTextView,
+                  textView.window?.firstResponder === textView else { return }
             parent.onChange(textView.string, textView.selectedRange())
         }
 
@@ -181,6 +206,9 @@ struct FormulaEditor: NSViewRepresentable {
             case #selector(NSResponder.insertTab(_:)):
                 // Tab completes; otherwise swallow it rather than type a tab.
                 _ = parent.onCommand(.complete)
+                return true
+            case #selector(NSResponder.insertBacktab(_:)):
+                _ = parent.onCommand(.backtab)
                 return true
             case #selector(NSResponder.moveUp(_:)):
                 return parent.onCommand(.moveUp)

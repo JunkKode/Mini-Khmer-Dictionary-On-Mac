@@ -5,14 +5,14 @@
 
 import SwiftUI
 
-/// The keypad: a two-line display over a 5 × 5 grid of keys. Keyboard input
-/// arrives through `CalculatorModel.handleKeyDown`, which also lights the
-/// matching key.
 struct SimpleCalculatorView: View {
     @ObservedObject var model: CalculatorModel
-
+    
     private var calculator: SimpleCalculator { model.simple }
-
+    
+    private let morphSpring = Animation.spring(response: 0.32, dampingFraction: 0.82, blendDuration: 0.1)
+    private let digitSpring = Animation.spring(response: 0.24, dampingFraction: 0.86, blendDuration: 0.08)
+    
     var body: some View {
         VStack(spacing: 0) {
             display
@@ -21,9 +21,7 @@ struct SimpleCalculatorView: View {
                 .padding(12)
         }
     }
-
-    // MARK: - Display
-
+    
     private var display: some View {
         VStack(alignment: .trailing, spacing: 4) {
             Text(expressionLine)
@@ -32,7 +30,12 @@ struct SimpleCalculatorView: View {
                 .lineLimit(1)
                 .truncationMode(.head)
                 .frame(minHeight: 22)
-
+                .contentTransition(.interpolate)
+                .offset(y: calculator.justEvaluated ? -1 : 0)
+                .scaleEffect(calculator.justEvaluated ? 0.96 : 1.0, anchor: .trailing)
+                .animation(morphSpring, value: expressionLine)
+                .animation(morphSpring, value: calculator.justEvaluated)
+            
             Text(resultLine)
                 .font(.system(size: 38, weight: .semibold, design: .rounded))
                 .monospacedDigit()
@@ -41,47 +44,89 @@ struct SimpleCalculatorView: View {
                 .minimumScaleFactor(0.4)
                 .textSelection(.enabled)
                 .contentTransition(.numericText())
-
-            Text(calculator.error.map { "\($0.code)  \($0.message)" } ?? " ")
-                .font(.system(size: 11))
-                .foregroundStyle(.red)
-                .lineLimit(1)
+                .scaleEffect(resultIsFinal ? 1.0 : 0.96, anchor: .trailing)
+                .animation(digitSpring, value: resultLine)
+                .animation(morphSpring, value: resultIsFinal)
+            
+            if let error = calculator.error {
+                Text("\(error.code)  \(error.message)")
+                    .font(.system(size: 11))
+                    .foregroundStyle(.red)
+                    .lineLimit(1)
+                    .contentTransition(.interpolate)
+                    .transition(.opacity.combined(with: .move(edge: .bottom)))
+            } else {
+                Text(khmerWords ?? " ")
+                    .font(.system(size: 11))
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                    .truncationMode(.middle)
+                    .textSelection(.enabled)
+                    .contentTransition(.interpolate)
+                    .opacity(khmerWords == nil ? 0 : (resultIsFinal ? 1.0 : 0.75))
+                    .animation(morphSpring, value: khmerWords)
+                    .animation(morphSpring, value: resultIsFinal)
+                    .help(khmerWords.map { "\($0) — right-click to copy" } ?? "")
+                    .contextMenu {
+                        if let khmerWords {
+                            Button("Copy in Khmer Words") { model.copy(khmerWords) }
+                        }
+                    }
+            }
         }
         .frame(maxWidth: .infinity, alignment: .trailing)
         .padding(.horizontal, 18)
         .padding(.top, 12)
         .padding(.bottom, 8)
+        .animation(morphSpring, value: calculator.error?.code)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("\(expressionLine), result \(resultLine)")
     }
-
+    
+    private var khmerWords: String? {
+        guard resultIsFinal || calculator.preview.value != nil,
+              let value = calculator.justEvaluated || !calculator.expression.isEmpty ? calculator.preview.value : nil
+                else { return nil }
+        return KhmerWordsLine.words(for: value)
+    }
+    
     private var expressionLine: String {
         if let evaluated = calculator.evaluatedExpression {
             return SimpleCalculator.displayText(evaluated) + " ="
         }
         return SimpleCalculator.displayText(calculator.expression)
     }
-
+    
     private var resultIsFinal: Bool {
         calculator.justEvaluated || calculator.expression.isEmpty
     }
-
+    
     private var resultLine: String {
         if calculator.justEvaluated, let value = calculator.preview.value {
             return FormulaFormatter.display(value)
         }
         if calculator.expression.isEmpty { return "0" }
         switch calculator.preview {
-        case .value(let value, _): return FormulaFormatter.display(value)
-        case .failure(let error) where error.kind != .incomplete: return error.code
-        default: return "…"
+            case .value(let value, _): return FormulaFormatter.display(value)
+            case .failure(let error) where error.kind != .incomplete: return error.code
+            default: return "…"
         }
     }
-
-    // MARK: - Keypad
-
+    
     private var keypad: some View {
-        Grid(horizontalSpacing: 7, verticalSpacing: 7) {
+        Group {
+            if #available(macOS 26.0, *) {
+                GlassEffectContainer(spacing: 8) {
+                    keypadGrid
+                }
+            } else {
+                keypadGrid
+            }
+        }
+    }
+    
+    private var keypadGrid: some View {
+        Grid(horizontalSpacing: 5, verticalSpacing: 5) {
             GridRow {
                 key("C", .clear, role: .function, help: "Clear (esc)")
                 key("⌫", .backspace, role: .function, help: "Delete (⌫)", systemImage: "delete.left")
@@ -119,7 +164,8 @@ struct SimpleCalculatorView: View {
             }
         }
     }
-
+    
+    @ViewBuilder
     private func key(
         _ title: String,
         _ key: SimpleCalculator.Key,
@@ -127,7 +173,7 @@ struct SimpleCalculatorView: View {
         help: String? = nil,
         systemImage: String? = nil
     ) -> some View {
-        Button {
+        let button = Button {
             model.press(key)
         } label: {
             Group {
@@ -138,56 +184,78 @@ struct SimpleCalculatorView: View {
                     Text(title)
                 }
             }
+            .font(.system(size: 20, weight: .medium, design: .rounded))
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .contentShape(Rectangle())
         }
-        .buttonStyle(KeypadButtonStyle(role: role, isFlashing: model.flashedKey == key))
-        .focusable(false)
-        .help(help ?? title)
-        .accessibilityLabel(accessibilityName(title, key))
-    }
+            .focusable(false)
+            .help(help ?? title)
+            .accessibilityLabel(accessibilityName(title, key))
+        
+        if #available(macOS 26.0, *) {
+            let glass: Glass = switch role {
+            case .operator:
+                .regular.tint(Color.accentColor.opacity(0.14)).interactive()
+            case .equals:
+                .regular.tint(.accentColor).interactive()
+            default:
+                .regular.interactive()
+            }
 
+            button
+                .buttonStyle(.plain)
+                .glassEffect(
+                    glass,
+                    in: RoundedRectangle(cornerRadius: 10, style: .continuous)
+                )
+        } else {
+            button.buttonStyle(
+                KeypadButtonStyle(
+                    role: role,
+                    isFlashing: model.flashedKey == key
+                )
+            )
+        }
+    }
+    
     private func accessibilityName(_ title: String, _ key: SimpleCalculator.Key) -> String {
         switch key {
-        case .clear: "Clear"
-        case .backspace: "Delete"
-        case .toggleSign: "Change sign"
-        case .percent: "Percent"
-        case .op(.add): "Plus"
-        case .op(.subtract): "Minus"
-        case .op(.multiply): "Times"
-        case .op(.divide): "Divided by"
-        case .op(.power): "To the power of"
-        case .equals: "Equals"
-        case .decimal: "Point"
-        case .openParen: "Open bracket"
-        case .closeParen: "Close bracket"
-        case .digit: title
+            case .clear: "Clear"
+            case .backspace: "Delete"
+            case .toggleSign: "Change sign"
+            case .percent: "Percent"
+            case .op(.add): "Plus"
+            case .op(.subtract): "Minus"
+            case .op(.multiply): "Times"
+            case .op(.divide): "Divided by"
+            case .op(.power): "To the power of"
+            case .equals: "Equals"
+            case .decimal: "Point"
+            case .openParen: "Open bracket"
+            case .closeParen: "Close bracket"
+            case .digit: title
         }
     }
 }
 
-/// Rounded keys in the popover's quiet palette: digits on a light fill,
-/// operators tinted with the accent colour, `=` filled with it.
 struct KeypadButtonStyle: ButtonStyle {
     enum Role { case digit, function, `operator`, equals }
-
+    
     let role: Role
     var isFlashing = false
-
+    
     func makeBody(configuration: Configuration) -> some View {
         KeypadKey(label: configuration.label, role: role, pressed: configuration.isPressed || isFlashing)
     }
 }
 
-/// A view rather than the style itself, so it can track hovering.
 private struct KeypadKey<Label: View>: View {
     let label: Label
     let role: KeypadButtonStyle.Role
     let pressed: Bool
-
+    
     @State private var isHovering = false
-
+    
     var body: some View {
         label
             .font(.system(size: role == .digit ? 20 : 19, weight: role == .digit ? .regular : .medium, design: .rounded))
@@ -200,27 +268,28 @@ private struct KeypadKey<Label: View>: View {
                 RoundedRectangle(cornerRadius: 8, style: .continuous)
                     .strokeBorder(Color.primary.opacity(role == .equals ? 0 : 0.06))
             )
-            .scaleEffect(pressed ? 0.97 : 1)
-            .animation(.easeOut(duration: 0.08), value: pressed)
+            .scaleEffect(pressed ? 0.95 : (isHovering ? 1.015 : 1.0))
+            .animation(.spring(response: 0.2, dampingFraction: 0.72), value: pressed)
+            .animation(.easeOut(duration: 0.14), value: isHovering)
             .onHover { isHovering = $0 }
     }
-
+    
     private var foreground: AnyShapeStyle {
         switch role {
-        case .digit: AnyShapeStyle(.primary)
-        case .function: AnyShapeStyle(.secondary)
-        case .operator: AnyShapeStyle(Color.accentColor)
-        case .equals: AnyShapeStyle(.white)
+            case .digit: AnyShapeStyle(.primary)
+            case .function: AnyShapeStyle(.secondary)
+            case .operator: AnyShapeStyle(Color.accentColor)
+            case .equals: AnyShapeStyle(.white)
         }
     }
-
+    
     private var fill: Color {
         let boost = (pressed ? 0.08 : 0) + (isHovering ? 0.03 : 0)
         switch role {
-        case .digit: return Color.primary.opacity(0.07 + boost)
-        case .function: return Color.primary.opacity(0.04 + boost)
-        case .operator: return Color.accentColor.opacity(0.14 + boost * 1.5)
-        case .equals: return Color.accentColor.opacity(pressed ? 0.75 : (isHovering ? 0.9 : 1))
+            case .digit: return Color.primary.opacity(0.07 + boost)
+            case .function: return Color.primary.opacity(0.04 + boost)
+            case .operator: return Color.accentColor.opacity(0.14 + boost * 1.5)
+            case .equals: return Color.accentColor.opacity(pressed ? 0.75 : (isHovering ? 0.9 : 1))
         }
     }
 }

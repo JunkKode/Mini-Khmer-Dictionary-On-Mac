@@ -16,10 +16,15 @@ enum FormulaValue: Equatable {
     /// A calendar day, as produced by `TODAY()`. Arithmetic treats it as a
     /// spreadsheet serial number (days since 1899-12-30).
     case date(Date)
+    /// A percentage, stored as a fraction: `15%` is `.percent(0.15)`. It
+    /// calculates like the plain number but shows as `15%`, and percentage
+    /// functions know it is already a rate.
+    case percent(Double)
 
     var typeName: String {
         switch self {
         case .number: "number"
+        case .percent: "percentage"
         case .text: "text"
         case .boolean: "logical value"
         case .date: "date"
@@ -45,6 +50,8 @@ struct FormulaError: Error, Equatable {
         case divisionByZero
         /// A numeric result that doesn't exist or overflows, e.g. `SQRT(-1)`.
         case number
+        /// A cell that doesn't exist, or cells that depend on each other.
+        case reference
     }
 
     let kind: Kind
@@ -66,6 +73,7 @@ struct FormulaError: Error, Equatable {
         case .argumentCount, .value: "#VALUE!"
         case .divisionByZero: "#DIV/0!"
         case .number: "#NUM!"
+        case .reference: "#REF!"
         }
     }
 }
@@ -77,7 +85,7 @@ extension FormulaValue {
     /// accepted only when it reads as a number.
     func asNumber(context: String? = nil) throws -> Double {
         switch self {
-        case .number(let value):
+        case .number(let value), .percent(let value):
             return value
         case .boolean(let flag):
             return flag ? 1 : 0
@@ -97,7 +105,7 @@ extension FormulaValue {
         switch self {
         case .boolean(let flag):
             return flag
-        case .number(let value):
+        case .number(let value), .percent(let value):
             return value != 0
         case .date:
             return true
@@ -117,6 +125,7 @@ extension FormulaValue {
         switch self {
         case .text(let text): text
         case .number(let value): FormulaFormatter.plain(value)
+        case .percent: FormulaFormatter.plain(self)
         case .boolean(let flag): flag ? "TRUE" : "FALSE"
         case .date(let date): FormulaFormatter.display(date)
         }

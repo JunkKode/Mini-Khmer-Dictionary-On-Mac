@@ -43,6 +43,8 @@ struct FormulaToken: Equatable {
         case rightParen
         /// `,` or `;` between function arguments.
         case separator
+        /// `:` between the corners of a cell range, `A1:B5`.
+        case colon
         /// A character the language doesn't use. Kept so the editor can still
         /// colour everything around it.
         case invalid(String)
@@ -163,6 +165,7 @@ enum FormulaLexer {
             case leftParenUnit: kind = .leftParen
             case rightParenUnit: kind = .rightParen
             case comma, semicolon: kind = .separator
+            case colonUnit: kind = .colon
             case notEqualSign: kind = .op(.notEqual)
             case lessOrEqualSign: kind = .op(.lessOrEqual)
             case greaterOrEqualSign: kind = .op(.greaterOrEqual)
@@ -208,6 +211,7 @@ enum FormulaLexer {
     private static let rightParenUnit = UInt16(UInt8(ascii: ")"))
     private static let comma = UInt16(UInt8(ascii: ","))
     private static let semicolon = UInt16(UInt8(ascii: ";"))
+    private static let colonUnit = UInt16(UInt8(ascii: ":"))
     private static let less = UInt16(UInt8(ascii: "<"))
     private static let greater = UInt16(UInt8(ascii: ">"))
     private static let bang = UInt16(UInt8(ascii: "!"))

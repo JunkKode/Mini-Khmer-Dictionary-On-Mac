@@ -10,13 +10,18 @@ import Foundation
 /// the registry.
 struct FormulaEvaluator {
     let functions: FormulaFunctionRegistry
+    var cells: FormulaCells?
+
+    /// Larger ranges are refused rather than walked.
+    static let maximumRangeSize = 10_000
 
     func evaluate(_ expression: FormulaExpression) throws -> FormulaValue {
         let value = try value(of: expression)
-        if case .number(let number) = value {
-            return .number(try finite(number))
+        switch value {
+        case .number(let number): return .number(try finite(number))
+        case .percent(let fraction): return .percent(try finite(fraction))
+        default: return value
         }
-        return value
     }
 
     private func value(of expression: FormulaExpression) throws -> FormulaValue {
@@ -28,14 +33,57 @@ struct FormulaEvaluator {
         case .boolean(let flag):
             return .boolean(flag)
         case .negate(let operand):
-            return .number(-(try number(operand)))
+            let operandValue = try value(of: operand)
+            if case .percent(let fraction) = operandValue { return .percent(-fraction) }
+            return .number(-(try finite(operandValue.asNumber())))
         case .percent(let operand):
-            return .number(try number(operand) / 100)
+            return .percent(try number(operand) / 100)
         case .call(let name, let arguments, let range):
             return try call(name, arguments, range)
         case .binary(let op, let left, let right):
             return try binary(op, left, right)
+        case .reference(let address, let range):
+            return try cellValue(address, range: range) ?? .number(0)  // an empty cell counts as 0
+        case .cellRange(let start, let end, let range):
+            throw FormulaError(
+                .value,
+                "A range like \(start.name):\(end.name) needs a function around it, e.g. SUM(\(start.name):\(end.name)).",
+                range: range
+            )
         }
+    }
+
+    // MARK: - Cells
+
+    private func requireCells(_ address: CellAddress, range: Range<Int>) throws -> FormulaCells {
+        guard let cells else {
+            throw FormulaError(.reference, "Cell references like \(address.name) only work in Grid mode.", range: range)
+        }
+        guard cells.contains(address) else {
+            throw FormulaError(.reference, "There's no cell \(address.name). The grid is \(cells.extent).", range: range)
+        }
+        return cells
+    }
+
+    private func cellValue(_ address: CellAddress, range: Range<Int>) throws -> FormulaValue? {
+        let cells = try requireCells(address, range: range)
+        do {
+            return try cells.value(address)
+        } catch var error as FormulaError {
+            error.range = range
+            throw error
+        }
+    }
+
+    /// The filled cells of a range; empty ones are skipped, as in a spreadsheet.
+    private func rangeValues(_ start: CellAddress, _ end: CellAddress, range: Range<Int>) throws -> [FormulaValue] {
+        _ = try requireCells(start, range: range)
+        _ = try requireCells(end, range: range)
+        let addresses = CellAddress.range(start, end)
+        guard addresses.count <= Self.maximumRangeSize else {
+            throw FormulaError(.reference, "That range is too large.", range: range)
+        }
+        return try addresses.compactMap { try cellValue($0, range: range) }
     }
 
     private func number(_ expression: FormulaExpression) throws -> Double {
@@ -100,6 +148,9 @@ struct FormulaEvaluator {
         case (_, .date(let date)) where op == .plus:
             let days = try lhs.asNumber()
             return .date(try FormulaDate.date(fromSerial: Double(FormulaDate.serial(of: date)) + days))
+        case (.percent(let a), .percent(let b)):
+            // 50% + 10% is 60%, not 50% increased by a tenth.
+            return .percent(try finite(a + sign * b))
         default:
             break
         }
@@ -150,9 +201,31 @@ struct FormulaEvaluator {
             throw FormulaError(.argumentCount, arityMessage(function, given: count), range: range)
         }
 
-        let thunks = arguments.map { argument in { try self.value(of: argument) } }
+        // A range becomes one argument per filled cell, so SUM(A1:A3) is
+        // SUM(A1, A2, A3). Only functions that take any number of values can
+        // accept one.
+        var thunks: [() throws -> FormulaValue] = []
+        var fromRange: [Bool] = []
+        for argument in arguments {
+            if case .cellRange(let start, let end, let argumentRange) = argument {
+                guard function.isVariadic else {
+                    throw FormulaError(
+                        .value,
+                        "\(function.name) takes single values, not a range like \(start.name):\(end.name).",
+                        range: argumentRange
+                    )
+                }
+                for value in try rangeValues(start, end, range: argumentRange) {
+                    thunks.append { value }
+                    fromRange.append(true)
+                }
+            } else {
+                thunks.append { try self.value(of: argument) }
+                fromRange.append(false)
+            }
+        }
         do {
-            return try function.evaluate(FormulaArguments(functionName: function.name, thunks: thunks))
+            return try function.evaluate(FormulaArguments(functionName: function.name, thunks: thunks, fromRange: fromRange))
         } catch var error as FormulaError {
             // Point at the call when the function itself didn't say where.
             if error.range == nil { error.range = range }

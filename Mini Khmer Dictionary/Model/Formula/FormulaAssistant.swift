@@ -5,6 +5,16 @@
 
 import Foundation
 
+extension NSRange {
+    /// This range kept inside text of `length` UTF-16 units. Unlike
+    /// `NSIntersectionRange`, a plain caret (an empty range) keeps its place
+    /// rather than collapsing to the start.
+    func clamped(toLength length: Int) -> NSRange {
+        let start = Swift.min(Swift.max(location, 0), length)
+        return NSRange(location: start, length: Swift.min(Swift.max(self.length, 0), length - start))
+    }
+}
+
 /// Function names that could complete the word being typed.
 struct FormulaCompletion: Equatable {
     /// UTF-16 range of the partial name to replace.
@@ -38,6 +48,34 @@ enum FormulaAssistant {
         let names = registry.functions(matchingPrefix: name).prefix(maximumSuggestions).map(\.name)
         guard !names.isEmpty else { return nil }
         return FormulaCompletion(range: tokens[index].range, prefix: name, names: Array(names))
+    }
+
+    /// A function name still being typed, with suggestions open, reads as
+    /// unfinished rather than #NAME? — `=RO` is on its way to `=ROUND(`.
+    static func presenting(_ calculation: FormulaCalculation, completion: FormulaCompletion?) -> FormulaCalculation {
+        guard let completion,
+              let error = calculation.error,
+              error.kind == .unknownName,
+              error.range == completion.range else { return calculation }
+        return .failure(FormulaError(.incomplete, "Keep typing, or press ⇥ to pick a function.", range: error.range))
+    }
+
+    /// The source after choosing `name` from `completion`, and where the caret
+    /// goes: inside the brackets, or after them for `PI()` and `TODAY()`.
+    static func accept(
+        _ name: String,
+        from completion: FormulaCompletion,
+        in source: String,
+        registry: FormulaFunctionRegistry = .standard
+    ) -> (text: String, caret: Int) {
+        let source = source as NSString
+        let range = NSRange(location: completion.range.lowerBound, length: completion.range.count)
+        let followedByParen = NSMaxRange(range) < source.length
+            && source.substring(with: NSRange(location: NSMaxRange(range), length: 1)) == "("
+        let takesArguments = registry.function(named: name)?.maximumArguments != 0
+        let insertion = followedByParen ? name : name + "()"
+        let caret = range.location + (name as NSString).length + (followedByParen || takesArguments ? 1 : 2)
+        return (source.replacingCharacters(in: range, with: insertion), caret)
     }
 
     static func signature(
