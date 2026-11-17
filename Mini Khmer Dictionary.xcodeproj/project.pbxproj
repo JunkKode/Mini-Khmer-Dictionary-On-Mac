@@ -6,27 +6,200 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		042609A130A4D557003626B4 /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = 042609A030A4D557003626B4 /* AppIcon.icon */; };
+		04E0E12D30AC331F005E59E6 /* CalculationHistory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04E0E0EA30AC331F005E59E6 /* CalculationHistory.swift */; };
+		04E0E12E30AC331F005E59E6 /* CalculatorTools.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04E0E0EB30AC331F005E59E6 /* CalculatorTools.swift */; };
+		04E0E12F30AC331F005E59E6 /* ExchangeRates.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04E0E0EC30AC331F005E59E6 /* ExchangeRates.swift */; };
+		04E0E13030AC331F005E59E6 /* KhmerNumbers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04E0E0ED30AC331F005E59E6 /* KhmerNumbers.swift */; };
+		04E0E13130AC331F005E59E6 /* SimpleCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04E0E0EE30AC331F005E59E6 /* SimpleCalculator.swift */; };
+		04E0E13230AC331F005E59E6 /* FormulaAssistant.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04E0E0F030AC331F005E59E6 /* FormulaAssistant.swift */; };
+		04E0E13330AC331F005E59E6 /* FormulaCells.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04E0E0F130AC331F005E59E6 /* FormulaCells.swift */; };
+		04E0E13430AC331F005E59E6 /* FormulaEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04E0E0F230AC331F005E59E6 /* FormulaEngine.swift */; };
+		04E0E13530AC331F005E59E6 /* FormulaEvaluator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04E0E0F330AC331F005E59E6 /* FormulaEvaluator.swift */; };
+		04E0E13630AC331F005E59E6 /* FormulaFunctions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04E0E0F430AC331F005E59E6 /* FormulaFunctions.swift */; };
+		04E0E13730AC331F005E59E6 /* FormulaKhmerFunctions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04E0E0F530AC331F005E59E6 /* FormulaKhmerFunctions.swift */; };
+		04E0E13830AC331F005E59E6 /* FormulaLexer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04E0E0F630AC331F005E59E6 /* FormulaLexer.swift */; };
+		04E0E13930AC331F005E59E6 /* FormulaParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04E0E0F730AC331F005E59E6 /* FormulaParser.swift */; };
+		04E0E13A30AC331F005E59E6 /* FormulaValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04E0E0F830AC331F005E59E6 /* FormulaValue.swift */; };
+		04E0E13B30AC331F005E59E6 /* GridFill.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04E0E0FA30AC331F005E59E6 /* GridFill.swift */; };
+		04E0E13C30AC331F005E59E6 /* GridModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04E0E0FB30AC331F005E59E6 /* GridModel.swift */; };
+		04E0E13D30AC331F005E59E6 /* GridSelection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04E0E0FC30AC331F005E59E6 /* GridSelection.swift */; };
+		04E0E13E30AC331F005E59E6 /* Spreadsheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04E0E0FD30AC331F005E59E6 /* Spreadsheet.swift */; };
+		04E0E13F30AC331F005E59E6 /* Workbook.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04E0E0FE30AC331F005E59E6 /* Workbook.swift */; };
+		04E0E14030AC331F005E59E6 /* CalculatorModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04E0E10030AC331F005E59E6 /* CalculatorModel.swift */; };
+		04E0E14130AC331F005E59E6 /* CalendarModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04E0E10130AC331F005E59E6 /* CalendarModel.swift */; };
+		04E0E14230AC331F005E59E6 /* DictionaryEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04E0E10230AC331F005E59E6 /* DictionaryEntry.swift */; };
+		04E0E14330AC331F005E59E6 /* DictionaryModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04E0E10330AC331F005E59E6 /* DictionaryModel.swift */; };
+		04E0E14430AC331F005E59E6 /* DictionaryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04E0E10430AC331F005E59E6 /* DictionaryStore.swift */; };
+		04E0E14530AC331F005E59E6 /* KhmerSpellChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04E0E10530AC331F005E59E6 /* KhmerSpellChecker.swift */; };
+		04E0E14630AC331F005E59E6 /* KhmerWordPrediction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04E0E10630AC331F005E59E6 /* KhmerWordPrediction.swift */; };
+		04E0E14730AC331F005E59E6 /* RomanizedSearch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04E0E10730AC331F005E59E6 /* RomanizedSearch.swift */; };
+		04E0E14830AC331F005E59E6 /* SpellCheckModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04E0E10830AC331F005E59E6 /* SpellCheckModel.swift */; };
+		04E0E14930AC331F005E59E6 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04E0E10C30AC331F005E59E6 /* AppDelegate.swift */; };
+		04E0E14A30AC331F005E59E6 /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04E0E10D30AC331F005E59E6 /* AppTheme.swift */; };
+		04E0E14B30AC331F005E59E6 /* CalculatorKeyboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04E0E10E30AC331F005E59E6 /* CalculatorKeyboard.swift */; };
+		04E0E14C30AC331F005E59E6 /* DismissPopoverAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04E0E10F30AC331F005E59E6 /* DismissPopoverAction.swift */; };
+		04E0E14D30AC331F005E59E6 /* GridKeyboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04E0E11030AC331F005E59E6 /* GridKeyboard.swift */; };
+		04E0E14E30AC331F005E59E6 /* CalculationHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04E0E11230AC331F005E59E6 /* CalculationHistoryView.swift */; };
+		04E0E14F30AC331F005E59E6 /* CalculatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04E0E11330AC331F005E59E6 /* CalculatorView.swift */; };
+		04E0E15030AC331F005E59E6 /* CurrencyPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04E0E11430AC331F005E59E6 /* CurrencyPicker.swift */; };
+		04E0E15130AC331F005E59E6 /* FormulaEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04E0E11530AC331F005E59E6 /* FormulaEditor.swift */; };
+		04E0E15230AC331F005E59E6 /* FormulaHelpViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04E0E11630AC331F005E59E6 /* FormulaHelpViews.swift */; };
+		04E0E15330AC331F005E59E6 /* GridCalculatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04E0E11730AC331F005E59E6 /* GridCalculatorView.swift */; };
+		04E0E15430AC331F005E59E6 /* SimpleCalculatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04E0E11830AC331F005E59E6 /* SimpleCalculatorView.swift */; };
+		04E0E15530AC331F005E59E6 /* SmartCalculatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04E0E11930AC331F005E59E6 /* SmartCalculatorView.swift */; };
+		04E0E15630AC331F005E59E6 /* ToolsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04E0E11A30AC331F005E59E6 /* ToolsView.swift */; };
+		04E0E15730AC331F005E59E6 /* CalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04E0E11C30AC331F005E59E6 /* CalendarView.swift */; };
+		04E0E15830AC331F005E59E6 /* CopyToastView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04E0E11D30AC331F005E59E6 /* CopyToastView.swift */; };
+		04E0E15930AC331F005E59E6 /* DetailPane.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04E0E11E30AC331F005E59E6 /* DetailPane.swift */; };
+		04E0E15A30AC331F005E59E6 /* DictionaryPopoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04E0E11F30AC331F005E59E6 /* DictionaryPopoverView.swift */; };
+		04E0E15B30AC331F005E59E6 /* EmptyStateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04E0E12030AC331F005E59E6 /* EmptyStateView.swift */; };
+		04E0E15C30AC331F005E59E6 /* EntryRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04E0E12130AC331F005E59E6 /* EntryRowView.swift */; };
+		04E0E15D30AC331F005E59E6 /* PopoverRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04E0E12230AC331F005E59E6 /* PopoverRootView.swift */; };
+		04E0E15E30AC331F005E59E6 /* ResizeHandle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04E0E12330AC331F005E59E6 /* ResizeHandle.swift */; };
+		04E0E15F30AC331F005E59E6 /* SearchBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04E0E12430AC331F005E59E6 /* SearchBar.swift */; };
+		04E0E16030AC331F005E59E6 /* SpellCheckTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04E0E12530AC331F005E59E6 /* SpellCheckTextView.swift */; };
+		04E0E16130AC331F005E59E6 /* SpellCheckView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04E0E12630AC331F005E59E6 /* SpellCheckView.swift */; };
+		04E0E16230AC331F005E59E6 /* StatusBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04E0E12730AC331F005E59E6 /* StatusBar.swift */; };
+		04E0E16330AC331F005E59E6 /* Mini_Khmer_DictionaryApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04E0E12B30AC331F005E59E6 /* Mini_Khmer_DictionaryApp.swift */; };
+		04E0E16430AC331F005E59E6 /* khmer_dict.sqlite3 in Resources */ = {isa = PBXBuildFile; fileRef = 04E0E10A30AC331F005E59E6 /* khmer_dict.sqlite3 */; };
+		04E0E16530AC331F005E59E6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 04E0E12930AC331F005E59E6 /* Assets.xcassets */; };
+		C0DE000000000000005EED0C /* KhmerCalendarWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = C0DE000000000000005EED00 /* KhmerCalendarWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		AB1E00000000000051EC7000 /* QuickLookupModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB1D00000000000051EC7000 /* QuickLookupModel.swift */; };
+		AB1E00000000000051EC7001 /* QuickLookupCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB1D00000000000051EC7001 /* QuickLookupCard.swift */; };
+		AB1E00000000000051EC7002 /* SelectionReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB1D00000000000051EC7002 /* SelectionReader.swift */; };
+		AB1E00000000000051EC7003 /* QuickLookupPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB1D00000000000051EC7003 /* QuickLookupPanel.swift */; };
+		AB1E00000000000051EC700A /* ClipboardHistory.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB1D00000000000051EC700A /* ClipboardHistory.swift */; };
+		AB1E00000000000051EC700B /* ClipboardHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB1D00000000000051EC700B /* ClipboardHistoryView.swift */; };
+		AB1E00000000000051EC700C /* FloatingPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB1D00000000000051EC700C /* FloatingPanel.swift */; };
+		AB1E00000000000051EC700D /* ClipboardPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB1D00000000000051EC700D /* ClipboardPanel.swift */; };
+		AB1E00000000000051EC7014 /* Hotkeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB1D00000000000051EC7014 /* Hotkeys.swift */; };
+		AB1E00000000000051EC7015 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB1D00000000000051EC7015 /* SettingsView.swift */; };
+		AB1E00000000000051EC7016 /* SettingsWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB1D00000000000051EC7016 /* SettingsWindow.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		C0DE000000000000005EED0D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 049399823051B3A800F7B216 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = C0DE000000000000005EED04;
+			remoteInfo = KhmerCalendarWidget;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		C0DE000000000000005EED0B /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				C0DE000000000000005EED0C /* KhmerCalendarWidget.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		042609A030A4D557003626B4 /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = AppIcon.icon; sourceTree = "<group>"; };
 		0493998A3051B3A800F7B216 /* Mini Khmer Dictionary.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Mini Khmer Dictionary.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		04E0E0EA30AC331F005E59E6 /* CalculationHistory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalculationHistory.swift; sourceTree = "<group>"; };
+		04E0E0EB30AC331F005E59E6 /* CalculatorTools.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalculatorTools.swift; sourceTree = "<group>"; };
+		04E0E0EC30AC331F005E59E6 /* ExchangeRates.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExchangeRates.swift; sourceTree = "<group>"; };
+		04E0E0ED30AC331F005E59E6 /* KhmerNumbers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KhmerNumbers.swift; sourceTree = "<group>"; };
+		04E0E0EE30AC331F005E59E6 /* SimpleCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleCalculator.swift; sourceTree = "<group>"; };
+		04E0E0F030AC331F005E59E6 /* FormulaAssistant.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormulaAssistant.swift; sourceTree = "<group>"; };
+		04E0E0F130AC331F005E59E6 /* FormulaCells.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormulaCells.swift; sourceTree = "<group>"; };
+		04E0E0F230AC331F005E59E6 /* FormulaEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormulaEngine.swift; sourceTree = "<group>"; };
+		04E0E0F330AC331F005E59E6 /* FormulaEvaluator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormulaEvaluator.swift; sourceTree = "<group>"; };
+		04E0E0F430AC331F005E59E6 /* FormulaFunctions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormulaFunctions.swift; sourceTree = "<group>"; };
+		04E0E0F530AC331F005E59E6 /* FormulaKhmerFunctions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormulaKhmerFunctions.swift; sourceTree = "<group>"; };
+		04E0E0F630AC331F005E59E6 /* FormulaLexer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormulaLexer.swift; sourceTree = "<group>"; };
+		04E0E0F730AC331F005E59E6 /* FormulaParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormulaParser.swift; sourceTree = "<group>"; };
+		04E0E0F830AC331F005E59E6 /* FormulaValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormulaValue.swift; sourceTree = "<group>"; };
+		04E0E0FA30AC331F005E59E6 /* GridFill.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GridFill.swift; sourceTree = "<group>"; };
+		04E0E0FB30AC331F005E59E6 /* GridModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GridModel.swift; sourceTree = "<group>"; };
+		04E0E0FC30AC331F005E59E6 /* GridSelection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GridSelection.swift; sourceTree = "<group>"; };
+		04E0E0FD30AC331F005E59E6 /* Spreadsheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Spreadsheet.swift; sourceTree = "<group>"; };
+		04E0E0FE30AC331F005E59E6 /* Workbook.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Workbook.swift; sourceTree = "<group>"; };
+		04E0E10030AC331F005E59E6 /* CalculatorModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalculatorModel.swift; sourceTree = "<group>"; };
+		04E0E10130AC331F005E59E6 /* CalendarModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarModel.swift; sourceTree = "<group>"; };
+		04E0E10230AC331F005E59E6 /* DictionaryEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictionaryEntry.swift; sourceTree = "<group>"; };
+		04E0E10330AC331F005E59E6 /* DictionaryModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictionaryModel.swift; sourceTree = "<group>"; };
+		04E0E10430AC331F005E59E6 /* DictionaryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictionaryStore.swift; sourceTree = "<group>"; };
+		04E0E10530AC331F005E59E6 /* KhmerSpellChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KhmerSpellChecker.swift; sourceTree = "<group>"; };
+		04E0E10630AC331F005E59E6 /* KhmerWordPrediction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KhmerWordPrediction.swift; sourceTree = "<group>"; };
+		04E0E10730AC331F005E59E6 /* RomanizedSearch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RomanizedSearch.swift; sourceTree = "<group>"; };
+		04E0E10830AC331F005E59E6 /* SpellCheckModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpellCheckModel.swift; sourceTree = "<group>"; };
+		04E0E10A30AC331F005E59E6 /* khmer_dict.sqlite3 */ = {isa = PBXFileReference; lastKnownFileType = file; path = khmer_dict.sqlite3; sourceTree = "<group>"; };
+		04E0E10C30AC331F005E59E6 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		04E0E10D30AC331F005E59E6 /* AppTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTheme.swift; sourceTree = "<group>"; };
+		04E0E10E30AC331F005E59E6 /* CalculatorKeyboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalculatorKeyboard.swift; sourceTree = "<group>"; };
+		04E0E10F30AC331F005E59E6 /* DismissPopoverAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DismissPopoverAction.swift; sourceTree = "<group>"; };
+		04E0E11030AC331F005E59E6 /* GridKeyboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GridKeyboard.swift; sourceTree = "<group>"; };
+		04E0E11230AC331F005E59E6 /* CalculationHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalculationHistoryView.swift; sourceTree = "<group>"; };
+		04E0E11330AC331F005E59E6 /* CalculatorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalculatorView.swift; sourceTree = "<group>"; };
+		04E0E11430AC331F005E59E6 /* CurrencyPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrencyPicker.swift; sourceTree = "<group>"; };
+		04E0E11530AC331F005E59E6 /* FormulaEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormulaEditor.swift; sourceTree = "<group>"; };
+		04E0E11630AC331F005E59E6 /* FormulaHelpViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormulaHelpViews.swift; sourceTree = "<group>"; };
+		04E0E11730AC331F005E59E6 /* GridCalculatorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GridCalculatorView.swift; sourceTree = "<group>"; };
+		04E0E11830AC331F005E59E6 /* SimpleCalculatorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleCalculatorView.swift; sourceTree = "<group>"; };
+		04E0E11930AC331F005E59E6 /* SmartCalculatorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartCalculatorView.swift; sourceTree = "<group>"; };
+		04E0E11A30AC331F005E59E6 /* ToolsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolsView.swift; sourceTree = "<group>"; };
+		04E0E11C30AC331F005E59E6 /* CalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarView.swift; sourceTree = "<group>"; };
+		04E0E11D30AC331F005E59E6 /* CopyToastView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CopyToastView.swift; sourceTree = "<group>"; };
+		04E0E11E30AC331F005E59E6 /* DetailPane.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailPane.swift; sourceTree = "<group>"; };
+		04E0E11F30AC331F005E59E6 /* DictionaryPopoverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictionaryPopoverView.swift; sourceTree = "<group>"; };
+		04E0E12030AC331F005E59E6 /* EmptyStateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmptyStateView.swift; sourceTree = "<group>"; };
+		04E0E12130AC331F005E59E6 /* EntryRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntryRowView.swift; sourceTree = "<group>"; };
+		04E0E12230AC331F005E59E6 /* PopoverRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopoverRootView.swift; sourceTree = "<group>"; };
+		04E0E12330AC331F005E59E6 /* ResizeHandle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResizeHandle.swift; sourceTree = "<group>"; };
+		04E0E12430AC331F005E59E6 /* SearchBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchBar.swift; sourceTree = "<group>"; };
+		04E0E12530AC331F005E59E6 /* SpellCheckTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpellCheckTextView.swift; sourceTree = "<group>"; };
+		04E0E12630AC331F005E59E6 /* SpellCheckView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpellCheckView.swift; sourceTree = "<group>"; };
+		04E0E12730AC331F005E59E6 /* StatusBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusBar.swift; sourceTree = "<group>"; };
+		04E0E12930AC331F005E59E6 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		04E0E12A30AC331F005E59E6 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		04E0E12B30AC331F005E59E6 /* Mini_Khmer_DictionaryApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Mini_Khmer_DictionaryApp.swift; sourceTree = "<group>"; };
+		C0DE000000000000005EED00 /* KhmerCalendarWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = KhmerCalendarWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		AB1D00000000000051EC7000 /* QuickLookupModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickLookupModel.swift; sourceTree = "<group>"; };
+		AB1D00000000000051EC7001 /* QuickLookupCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickLookupCard.swift; sourceTree = "<group>"; };
+		AB1D00000000000051EC7002 /* SelectionReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectionReader.swift; sourceTree = "<group>"; };
+		AB1D00000000000051EC7003 /* QuickLookupPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickLookupPanel.swift; sourceTree = "<group>"; };
+		AB1D00000000000051EC700A /* ClipboardHistory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipboardHistory.swift; sourceTree = "<group>"; };
+		AB1D00000000000051EC700B /* ClipboardHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipboardHistoryView.swift; sourceTree = "<group>"; };
+		AB1D00000000000051EC700C /* FloatingPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloatingPanel.swift; sourceTree = "<group>"; };
+		AB1D00000000000051EC700D /* ClipboardPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipboardPanel.swift; sourceTree = "<group>"; };
+		AB1D00000000000051EC7014 /* Hotkeys.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Hotkeys.swift; sourceTree = "<group>"; };
+		AB1D00000000000051EC7015 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		AB1D00000000000051EC7016 /* SettingsWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsWindow.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		04A1C0DE3051B3A800F7B216 /* Exceptions for "Mini Khmer Dictionary" folder in "Mini Khmer Dictionary" target */ = {
+		C0DE000000000000005EED03 /* Exceptions for "KhmerCalendarWidget" folder in "KhmerCalendarWidget" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
 			);
-			target = 049399893051B3A800F7B216 /* Mini Khmer Dictionary */;
+			target = C0DE000000000000005EED04 /* KhmerCalendarWidget */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		0493998C3051B3A800F7B216 /* Mini Khmer Dictionary */ = {
+		C0DE000000000000005EED01 /* Shared */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		C0DE000000000000005EED02 /* KhmerCalendarWidget */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				04A1C0DE3051B3A800F7B216 /* Exceptions for "Mini Khmer Dictionary" folder in "Mini Khmer Dictionary" target */,
+				C0DE000000000000005EED03 /* Exceptions for "KhmerCalendarWidget" folder in "KhmerCalendarWidget" target */,
 			);
-			path = "Mini Khmer Dictionary";
+			path = KhmerCalendarWidget;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -39,13 +212,23 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		C0DE000000000000005EED06 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
 		049399813051B3A800F7B216 = {
 			isa = PBXGroup;
 			children = (
-				0493998C3051B3A800F7B216 /* Mini Khmer Dictionary */,
+				042609A030A4D557003626B4 /* AppIcon.icon */,
+				04E0E12C30AC331F005E59E6 /* Mini Khmer Dictionary */,
+				C0DE000000000000005EED01 /* Shared */,
+				C0DE000000000000005EED02 /* KhmerCalendarWidget */,
 				0493998B3051B3A800F7B216 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -54,8 +237,149 @@
 			isa = PBXGroup;
 			children = (
 				0493998A3051B3A800F7B216 /* Mini Khmer Dictionary.app */,
+				C0DE000000000000005EED00 /* KhmerCalendarWidget.appex */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		04E0E0EF30AC331F005E59E6 /* Calculator */ = {
+			isa = PBXGroup;
+			children = (
+				04E0E0EA30AC331F005E59E6 /* CalculationHistory.swift */,
+				04E0E0EB30AC331F005E59E6 /* CalculatorTools.swift */,
+				04E0E0EC30AC331F005E59E6 /* ExchangeRates.swift */,
+				04E0E0ED30AC331F005E59E6 /* KhmerNumbers.swift */,
+				04E0E0EE30AC331F005E59E6 /* SimpleCalculator.swift */,
+			);
+			path = Calculator;
+			sourceTree = "<group>";
+		};
+		04E0E0F930AC331F005E59E6 /* Formula */ = {
+			isa = PBXGroup;
+			children = (
+				04E0E0F030AC331F005E59E6 /* FormulaAssistant.swift */,
+				04E0E0F130AC331F005E59E6 /* FormulaCells.swift */,
+				04E0E0F230AC331F005E59E6 /* FormulaEngine.swift */,
+				04E0E0F330AC331F005E59E6 /* FormulaEvaluator.swift */,
+				04E0E0F430AC331F005E59E6 /* FormulaFunctions.swift */,
+				04E0E0F530AC331F005E59E6 /* FormulaKhmerFunctions.swift */,
+				04E0E0F630AC331F005E59E6 /* FormulaLexer.swift */,
+				04E0E0F730AC331F005E59E6 /* FormulaParser.swift */,
+				04E0E0F830AC331F005E59E6 /* FormulaValue.swift */,
+			);
+			path = Formula;
+			sourceTree = "<group>";
+		};
+		04E0E0FF30AC331F005E59E6 /* Grid */ = {
+			isa = PBXGroup;
+			children = (
+				04E0E0FA30AC331F005E59E6 /* GridFill.swift */,
+				04E0E0FB30AC331F005E59E6 /* GridModel.swift */,
+				04E0E0FC30AC331F005E59E6 /* GridSelection.swift */,
+				04E0E0FD30AC331F005E59E6 /* Spreadsheet.swift */,
+				04E0E0FE30AC331F005E59E6 /* Workbook.swift */,
+			);
+			path = Grid;
+			sourceTree = "<group>";
+		};
+		04E0E10930AC331F005E59E6 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				04E0E0EF30AC331F005E59E6 /* Calculator */,
+				04E0E0F930AC331F005E59E6 /* Formula */,
+				04E0E0FF30AC331F005E59E6 /* Grid */,
+				04E0E10030AC331F005E59E6 /* CalculatorModel.swift */,
+				04E0E10130AC331F005E59E6 /* CalendarModel.swift */,
+				AB1D00000000000051EC700A /* ClipboardHistory.swift */,
+				AB1D00000000000051EC7000 /* QuickLookupModel.swift */,
+				04E0E10230AC331F005E59E6 /* DictionaryEntry.swift */,
+				04E0E10330AC331F005E59E6 /* DictionaryModel.swift */,
+				04E0E10430AC331F005E59E6 /* DictionaryStore.swift */,
+				04E0E10530AC331F005E59E6 /* KhmerSpellChecker.swift */,
+				04E0E10630AC331F005E59E6 /* KhmerWordPrediction.swift */,
+				04E0E10730AC331F005E59E6 /* RomanizedSearch.swift */,
+				04E0E10830AC331F005E59E6 /* SpellCheckModel.swift */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
+		04E0E10B30AC331F005E59E6 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				04E0E10A30AC331F005E59E6 /* khmer_dict.sqlite3 */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		04E0E11130AC331F005E59E6 /* Support */ = {
+			isa = PBXGroup;
+			children = (
+				04E0E10C30AC331F005E59E6 /* AppDelegate.swift */,
+				AB1D00000000000051EC7016 /* SettingsWindow.swift */,
+				AB1D00000000000051EC7014 /* Hotkeys.swift */,
+				AB1D00000000000051EC700D /* ClipboardPanel.swift */,
+				AB1D00000000000051EC700C /* FloatingPanel.swift */,
+				AB1D00000000000051EC7003 /* QuickLookupPanel.swift */,
+				AB1D00000000000051EC7002 /* SelectionReader.swift */,
+				04E0E10D30AC331F005E59E6 /* AppTheme.swift */,
+				04E0E10E30AC331F005E59E6 /* CalculatorKeyboard.swift */,
+				04E0E10F30AC331F005E59E6 /* DismissPopoverAction.swift */,
+				04E0E11030AC331F005E59E6 /* GridKeyboard.swift */,
+			);
+			path = Support;
+			sourceTree = "<group>";
+		};
+		04E0E11B30AC331F005E59E6 /* Calculator */ = {
+			isa = PBXGroup;
+			children = (
+				04E0E11230AC331F005E59E6 /* CalculationHistoryView.swift */,
+				04E0E11330AC331F005E59E6 /* CalculatorView.swift */,
+				04E0E11430AC331F005E59E6 /* CurrencyPicker.swift */,
+				04E0E11530AC331F005E59E6 /* FormulaEditor.swift */,
+				04E0E11630AC331F005E59E6 /* FormulaHelpViews.swift */,
+				04E0E11730AC331F005E59E6 /* GridCalculatorView.swift */,
+				04E0E11830AC331F005E59E6 /* SimpleCalculatorView.swift */,
+				04E0E11930AC331F005E59E6 /* SmartCalculatorView.swift */,
+				04E0E11A30AC331F005E59E6 /* ToolsView.swift */,
+			);
+			path = Calculator;
+			sourceTree = "<group>";
+		};
+		04E0E12830AC331F005E59E6 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				04E0E11B30AC331F005E59E6 /* Calculator */,
+				04E0E11C30AC331F005E59E6 /* CalendarView.swift */,
+				04E0E11D30AC331F005E59E6 /* CopyToastView.swift */,
+				04E0E11E30AC331F005E59E6 /* DetailPane.swift */,
+				AB1D00000000000051EC7015 /* SettingsView.swift */,
+				AB1D00000000000051EC700B /* ClipboardHistoryView.swift */,
+				AB1D00000000000051EC7001 /* QuickLookupCard.swift */,
+				04E0E11F30AC331F005E59E6 /* DictionaryPopoverView.swift */,
+				04E0E12030AC331F005E59E6 /* EmptyStateView.swift */,
+				04E0E12130AC331F005E59E6 /* EntryRowView.swift */,
+				04E0E12230AC331F005E59E6 /* PopoverRootView.swift */,
+				04E0E12330AC331F005E59E6 /* ResizeHandle.swift */,
+				04E0E12430AC331F005E59E6 /* SearchBar.swift */,
+				04E0E12530AC331F005E59E6 /* SpellCheckTextView.swift */,
+				04E0E12630AC331F005E59E6 /* SpellCheckView.swift */,
+				04E0E12730AC331F005E59E6 /* StatusBar.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		04E0E12C30AC331F005E59E6 /* Mini Khmer Dictionary */ = {
+			isa = PBXGroup;
+			children = (
+				04E0E10930AC331F005E59E6 /* Model */,
+				04E0E10B30AC331F005E59E6 /* Resources */,
+				04E0E11130AC331F005E59E6 /* Support */,
+				04E0E12830AC331F005E59E6 /* Views */,
+				04E0E12930AC331F005E59E6 /* Assets.xcassets */,
+				04E0E12A30AC331F005E59E6 /* Info.plist */,
+				04E0E12B30AC331F005E59E6 /* Mini_Khmer_DictionaryApp.swift */,
+			);
+			path = "Mini Khmer Dictionary";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -68,13 +392,15 @@
 				049399863051B3A800F7B216 /* Sources */,
 				049399873051B3A800F7B216 /* Frameworks */,
 				049399883051B3A800F7B216 /* Resources */,
+				C0DE000000000000005EED0B /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				C0DE000000000000005EED0E /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				0493998C3051B3A800F7B216 /* Mini Khmer Dictionary */,
+				C0DE000000000000005EED01 /* Shared */,
 			);
 			name = "Mini Khmer Dictionary";
 			packageProductDependencies = (
@@ -82,6 +408,29 @@
 			productName = "Mini Khmer Dictionary";
 			productReference = 0493998A3051B3A800F7B216 /* Mini Khmer Dictionary.app */;
 			productType = "com.apple.product-type.application";
+		};
+		C0DE000000000000005EED04 /* KhmerCalendarWidget */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C0DE000000000000005EED0A /* Build configuration list for PBXNativeTarget "KhmerCalendarWidget" */;
+			buildPhases = (
+				C0DE000000000000005EED05 /* Sources */,
+				C0DE000000000000005EED06 /* Frameworks */,
+				C0DE000000000000005EED07 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				C0DE000000000000005EED01 /* Shared */,
+				C0DE000000000000005EED02 /* KhmerCalendarWidget */,
+			);
+			name = KhmerCalendarWidget;
+			packageProductDependencies = (
+			);
+			productName = KhmerCalendarWidget;
+			productReference = C0DE000000000000005EED00 /* KhmerCalendarWidget.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -94,6 +443,9 @@
 				LastUpgradeCheck = 2660;
 				TargetAttributes = {
 					049399893051B3A800F7B216 = {
+						CreatedOnToolsVersion = 26.6;
+					};
+					C0DE000000000000005EED04 = {
 						CreatedOnToolsVersion = 26.6;
 					};
 				};
@@ -113,12 +465,23 @@
 			projectRoot = "";
 			targets = (
 				049399893051B3A800F7B216 /* Mini Khmer Dictionary */,
+				C0DE000000000000005EED04 /* KhmerCalendarWidget */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		049399883051B3A800F7B216 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				042609A130A4D557003626B4 /* AppIcon.icon in Resources */,
+				04E0E16430AC331F005E59E6 /* khmer_dict.sqlite3 in Resources */,
+				04E0E16530AC331F005E59E6 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C0DE000000000000005EED07 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -132,10 +495,91 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				04E0E12D30AC331F005E59E6 /* CalculationHistory.swift in Sources */,
+				04E0E12E30AC331F005E59E6 /* CalculatorTools.swift in Sources */,
+				04E0E12F30AC331F005E59E6 /* ExchangeRates.swift in Sources */,
+				04E0E13030AC331F005E59E6 /* KhmerNumbers.swift in Sources */,
+				04E0E13130AC331F005E59E6 /* SimpleCalculator.swift in Sources */,
+				04E0E13230AC331F005E59E6 /* FormulaAssistant.swift in Sources */,
+				04E0E13330AC331F005E59E6 /* FormulaCells.swift in Sources */,
+				04E0E13430AC331F005E59E6 /* FormulaEngine.swift in Sources */,
+				04E0E13530AC331F005E59E6 /* FormulaEvaluator.swift in Sources */,
+				04E0E13630AC331F005E59E6 /* FormulaFunctions.swift in Sources */,
+				04E0E13730AC331F005E59E6 /* FormulaKhmerFunctions.swift in Sources */,
+				04E0E13830AC331F005E59E6 /* FormulaLexer.swift in Sources */,
+				04E0E13930AC331F005E59E6 /* FormulaParser.swift in Sources */,
+				04E0E13A30AC331F005E59E6 /* FormulaValue.swift in Sources */,
+				04E0E13B30AC331F005E59E6 /* GridFill.swift in Sources */,
+				04E0E13C30AC331F005E59E6 /* GridModel.swift in Sources */,
+				04E0E13D30AC331F005E59E6 /* GridSelection.swift in Sources */,
+				04E0E13E30AC331F005E59E6 /* Spreadsheet.swift in Sources */,
+				04E0E13F30AC331F005E59E6 /* Workbook.swift in Sources */,
+				04E0E14030AC331F005E59E6 /* CalculatorModel.swift in Sources */,
+				04E0E14130AC331F005E59E6 /* CalendarModel.swift in Sources */,
+				AB1E00000000000051EC700A /* ClipboardHistory.swift in Sources */,
+				AB1E00000000000051EC7000 /* QuickLookupModel.swift in Sources */,
+				04E0E14230AC331F005E59E6 /* DictionaryEntry.swift in Sources */,
+				04E0E14330AC331F005E59E6 /* DictionaryModel.swift in Sources */,
+				04E0E14430AC331F005E59E6 /* DictionaryStore.swift in Sources */,
+				04E0E14530AC331F005E59E6 /* KhmerSpellChecker.swift in Sources */,
+				04E0E14630AC331F005E59E6 /* KhmerWordPrediction.swift in Sources */,
+				04E0E14730AC331F005E59E6 /* RomanizedSearch.swift in Sources */,
+				04E0E14830AC331F005E59E6 /* SpellCheckModel.swift in Sources */,
+				04E0E14930AC331F005E59E6 /* AppDelegate.swift in Sources */,
+				AB1E00000000000051EC7016 /* SettingsWindow.swift in Sources */,
+				AB1E00000000000051EC7014 /* Hotkeys.swift in Sources */,
+				AB1E00000000000051EC700D /* ClipboardPanel.swift in Sources */,
+				AB1E00000000000051EC700C /* FloatingPanel.swift in Sources */,
+				AB1E00000000000051EC7003 /* QuickLookupPanel.swift in Sources */,
+				AB1E00000000000051EC7002 /* SelectionReader.swift in Sources */,
+				04E0E14A30AC331F005E59E6 /* AppTheme.swift in Sources */,
+				04E0E14B30AC331F005E59E6 /* CalculatorKeyboard.swift in Sources */,
+				04E0E14C30AC331F005E59E6 /* DismissPopoverAction.swift in Sources */,
+				04E0E14D30AC331F005E59E6 /* GridKeyboard.swift in Sources */,
+				04E0E14E30AC331F005E59E6 /* CalculationHistoryView.swift in Sources */,
+				04E0E14F30AC331F005E59E6 /* CalculatorView.swift in Sources */,
+				04E0E15030AC331F005E59E6 /* CurrencyPicker.swift in Sources */,
+				04E0E15130AC331F005E59E6 /* FormulaEditor.swift in Sources */,
+				04E0E15230AC331F005E59E6 /* FormulaHelpViews.swift in Sources */,
+				04E0E15330AC331F005E59E6 /* GridCalculatorView.swift in Sources */,
+				04E0E15430AC331F005E59E6 /* SimpleCalculatorView.swift in Sources */,
+				04E0E15530AC331F005E59E6 /* SmartCalculatorView.swift in Sources */,
+				04E0E15630AC331F005E59E6 /* ToolsView.swift in Sources */,
+				04E0E15730AC331F005E59E6 /* CalendarView.swift in Sources */,
+				04E0E15830AC331F005E59E6 /* CopyToastView.swift in Sources */,
+				04E0E15930AC331F005E59E6 /* DetailPane.swift in Sources */,
+				AB1E00000000000051EC7015 /* SettingsView.swift in Sources */,
+				AB1E00000000000051EC700B /* ClipboardHistoryView.swift in Sources */,
+				AB1E00000000000051EC7001 /* QuickLookupCard.swift in Sources */,
+				04E0E15A30AC331F005E59E6 /* DictionaryPopoverView.swift in Sources */,
+				04E0E15B30AC331F005E59E6 /* EmptyStateView.swift in Sources */,
+				04E0E15C30AC331F005E59E6 /* EntryRowView.swift in Sources */,
+				04E0E15D30AC331F005E59E6 /* PopoverRootView.swift in Sources */,
+				04E0E15E30AC331F005E59E6 /* ResizeHandle.swift in Sources */,
+				04E0E15F30AC331F005E59E6 /* SearchBar.swift in Sources */,
+				04E0E16030AC331F005E59E6 /* SpellCheckTextView.swift in Sources */,
+				04E0E16130AC331F005E59E6 /* SpellCheckView.swift in Sources */,
+				04E0E16230AC331F005E59E6 /* StatusBar.swift in Sources */,
+				04E0E16330AC331F005E59E6 /* Mini_Khmer_DictionaryApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C0DE000000000000005EED05 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		C0DE000000000000005EED0E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = C0DE000000000000005EED04 /* KhmerCalendarWidget */;
+			targetProxy = C0DE000000000000005EED0D /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		049399983051B3A900F7B216 /* Debug */ = {
@@ -269,10 +713,12 @@
 				DEVELOPMENT_TEAM = 392Q38TVJN;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Mini Khmer Dictionary/Info.plist";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.books";
 				INFOPLIST_KEY_LSUIElement = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -304,10 +750,12 @@
 				DEVELOPMENT_TEAM = 392Q38TVJN;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Mini Khmer Dictionary/Info.plist";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.books";
 				INFOPLIST_KEY_LSUIElement = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -322,6 +770,64 @@
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		C0DE000000000000005EED08 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 392Q38TVJN;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = KhmerCalendarWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Khmer Calendar";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.kuong.Mini-Khmer-Dictionary.KhmerCalendarWidget";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		C0DE000000000000005EED09 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 392Q38TVJN;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = KhmerCalendarWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Khmer Calendar";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.kuong.Mini-Khmer-Dictionary.KhmerCalendarWidget";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
@@ -345,6 +851,15 @@
 			buildConfigurations = (
 				0493999B3051B3A900F7B216 /* Debug */,
 				0493999C3051B3A900F7B216 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C0DE000000000000005EED0A /* Build configuration list for PBXNativeTarget "KhmerCalendarWidget" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C0DE000000000000005EED08 /* Debug */,
+				C0DE000000000000005EED09 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

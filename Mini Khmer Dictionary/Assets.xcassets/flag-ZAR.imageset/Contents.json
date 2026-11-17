@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "flag-ZAR.png",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

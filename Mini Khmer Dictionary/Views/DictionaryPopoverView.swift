@@ -9,26 +9,24 @@ import SwiftUI
 /// underneath.
 struct DictionaryPopoverView: View {
     @ObservedObject var model: DictionaryModel
-
+    
     @Environment(\.dismissPopover) private var dismissPopover
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @FocusState private var searchFieldIsFocused: Bool
-
-    /// Width of the word list; the reading pane takes whatever is left. Kept
-    /// across launches because it is a per-person preference.
+    
     @AppStorage("listWidth") private var listWidth = Self.defaultListWidth
-
+    
     private static let popoverWidth: Double = 620
     private static let defaultListWidth: Double = 268
     private static let minimumDetailWidth: Double = 250
     private static var listWidthRange: ClosedRange<Double> {
         200...(popoverWidth - minimumDetailWidth)
     }
-
+    
     private var animation: Animation? {
         reduceMotion ? nil : .easeOut(duration: 0.22)
     }
-
+    
     var body: some View {
         VStack(spacing: 0) {
             SearchBar(
@@ -36,32 +34,41 @@ struct DictionaryPopoverView: View {
                 isFocused: $searchFieldIsFocused,
                 isSearching: model.isSearching
             )
-
+            
             Divider()
-
+            
+            if model.query.isEmpty {
+                browseBar
+                Divider()
+            }
+            
             HStack(spacing: 0) {
                 results
                     .frame(width: listWidth)
-
+                
                 ResizeHandle(
                     width: $listWidth,
                     range: Self.listWidthRange,
                     defaultWidth: Self.defaultListWidth
                 )
-
+                
                 DetailPane(
                     entry: model.selectedEntry,
                     senses: model.senses,
+                    followers: model.followers,
+                    isSaved: model.selectedEntry.map(model.isSaved) ?? false,
                     onCopyWord: { model.copySelection(includeDefinition: false) },
-                    onCopyEntry: { model.copySelection(includeDefinition: true) }
+                    onCopyEntry: { model.copySelection(includeDefinition: true) },
+                    onToggleSave: { if let entry = model.selectedEntry { model.toggleSaved(entry) } },
+                    onLookUp: { model.lookUp($0) }
                 )
                 .frame(maxWidth: .infinity)
             }
             .frame(maxHeight: .infinity)
             .overlay(alignment: .bottom) { copyToast }
-
+            
             Divider()
-
+            
             StatusBar(
                 resultCount: model.entries.count,
                 totalCount: model.totalCount,
@@ -75,7 +82,6 @@ struct DictionaryPopoverView: View {
         .animation(animation, value: model.copyNotice)
         .animation(animation, value: model.selection)
         .task(id: model.query) {
-            // Debounce: a cancelled sleep means another keystroke arrived.
             try? await Task.sleep(for: .milliseconds(160))
             guard !Task.isCancelled else { return }
             await model.search()
@@ -86,10 +92,58 @@ struct DictionaryPopoverView: View {
         .task(id: model.focusRequest) {
             searchFieldIsFocused = true
         }
+        .task(id: model.listFilter) {
+            if model.query.isEmpty { await model.search() }
+        }
+        .task {
+            await model.loadWordOfTheDay()
+        }
     }
-
-    // MARK: - Results
-
+    
+    private var browseBar: some View {
+        HStack(spacing: 8) {
+            Picker("Show", selection: $model.listFilter) {
+                Text("All").tag(DictionaryModel.ListFilter.all)
+                Text("Saved\(model.saved.isEmpty ? "" : " \(model.saved.count)")").tag(DictionaryModel.ListFilter.saved)
+                Text("Recent").tag(DictionaryModel.ListFilter.recent)
+            }
+            .pickerStyle(.segmented)
+            .labelsHidden()
+            .controlSize(.small)
+            .fixedSize()
+            .help("Browse the dictionary, the words you saved, or the ones you looked up lately")
+            
+            if model.listFilter == .recent, !model.recent.isEmpty {
+                Button("Clear") { model.clearRecent() }
+                    .buttonStyle(.borderless)
+                    .font(.system(size: 11))
+            }
+            
+            Spacer(minLength: 4)
+            
+            if let today = model.wordOfTheDay {
+                Button {
+                    model.lookUp(today.word)
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: "sparkles")
+                            .foregroundStyle(.yellow)
+                        Text("Word of the day:")
+                            .foregroundStyle(.secondary)
+                        Text(today.word)
+                            .fontWeight(.semibold)
+                    }
+                    .font(.system(size: 11))
+                    .lineLimit(1)
+                }
+                .buttonStyle(.borderless)
+                .help(today.gloss)
+            }
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 5)
+    }
+    
     @ViewBuilder
     private var results: some View {
         if let failure = model.failureMessage {
@@ -104,6 +158,18 @@ struct DictionaryPopoverView: View {
                     .controlSize(.small)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .accessibilityLabel("Searching")
+            } else if model.query.isEmpty, model.listFilter == .saved {
+                EmptyStateView(
+                    title: "No saved words",
+                    systemImage: "star",
+                    message: "Press Save on a word to keep it here."
+                )
+            } else if model.query.isEmpty, model.listFilter == .recent {
+                EmptyStateView(
+                    title: "Nothing looked up yet",
+                    systemImage: "clock",
+                    message: "Words you search for and read appear here."
+                )
             } else if model.query.isEmpty {
                 EmptyStateView(
                     title: "No words loaded",
@@ -121,7 +187,7 @@ struct DictionaryPopoverView: View {
             entryList
         }
     }
-
+    
     private var entryList: some View {
         ScrollViewReader { proxy in
             ScrollView {
@@ -158,9 +224,7 @@ struct DictionaryPopoverView: View {
             }
         }
     }
-
-    // MARK: - Copy confirmation
-
+    
     @ViewBuilder
     private var copyToast: some View {
         if let notice = model.copyNotice {
