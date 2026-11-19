@@ -9,8 +9,8 @@ import SwiftUI
 
 /// Which part of the popover is showing.
 enum PopoverMode: Hashable, CaseIterable {
-    case lookUp
     case check
+    case lookUp
     case calculate
     case calendar
     // Everyday Cambodian conversions, each a tab of its own (ToolsView).
@@ -96,7 +96,7 @@ struct CopyNotice: Equatable, Identifiable {
 final class DictionaryModel: ObservableObject {
     /// Look-up or spell check. Lives here because the key handling in
     /// `AppDelegate` needs it as much as the view does.
-    @Published var mode: PopoverMode = .lookUp
+    @Published var mode: PopoverMode = .check
     
     /// Text in the search field. The view debounces changes before searching.
     @Published var query: String = ""

@@ -28,7 +28,7 @@ struct PopoverRootView: View {
             }
             .padding(.horizontal, 8)
             .padding(.vertical, 7)
-            .help("⌘1 Look Up · ⌘2 Check Spelling · ⌘3 Calculator · ⌘4 Calendar · ⌘5 Currency · ⌘6 Khmer No. · ⌘7 Gold & Units · ⌘8 Loan · ⌘9 Date")
+            .help("⌘1 Check Spelling · ⌘2 Look Up · ⌘3 Calculator · ⌘4 Calendar · ⌘5 Currency · ⌘6 Khmer No. · ⌘7 Gold & Units · ⌘8 Loan · ⌘9 Date")
             
             Divider()
             

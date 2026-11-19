@@ -85,13 +85,14 @@ nonisolated enum HotkeyError: Error, Equatable {
 
 /// The app's system-wide shortcuts.
 enum HotkeyAction: String, CaseIterable, Identifiable {
-    case lookUp, clipboard, clipboardKept
+    case lookUp, checkSelection, clipboard, clipboardKept
 
     var id: String { rawValue }
 
     var title: String {
         switch self {
             case .lookUp: "Look up selected text"
+            case .checkSelection: "Check spelling of selected text"
             case .clipboard: "Clipboard history"
             case .clipboardKept: "Clipboard history, kept open"
         }
@@ -100,6 +101,7 @@ enum HotkeyAction: String, CaseIterable, Identifiable {
     var defaultHotkey: Hotkey {
         switch self {
             case .lookUp: Hotkey(keyCode: 49, modifiers: UInt32(optionKey), keyName: "Space")
+            case .checkSelection: Hotkey(keyCode: 49, modifiers: UInt32(optionKey | shiftKey), keyName: "Space")
             case .clipboard: Hotkey(keyCode: 9, modifiers: UInt32(cmdKey | shiftKey), keyName: "V")
             case .clipboardKept: Hotkey(keyCode: 7, modifiers: UInt32(cmdKey | shiftKey), keyName: "X")
         }
@@ -111,6 +113,7 @@ enum HotkeyAction: String, CaseIterable, Identifiable {
             case .lookUp: 1
             case .clipboard: 2
             case .clipboardKept: 3
+            case .checkSelection: 4
         }
     }
 }
