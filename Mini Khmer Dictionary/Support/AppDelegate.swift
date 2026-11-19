@@ -27,6 +27,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         self?.settingsWindow.show()
     }
     private let settingsWindow = SettingsWindowController()
+    private lazy var quickCheck = QuickCheckPanelController(openStore: { [model] in model.openStore() }) { [weak self] text in
+        guard let self else { return }
+        self.model.mode = .check
+        self.checker.load(text)
+        self.showPopover()
+    }
     
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
@@ -40,6 +46,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // Look up the selection (⌥Space) and clipboard history (⇧⌘V), or
         // whatever keys the user chose instead.
         HotkeySettings.shared.activate(.lookUp) { [weak self] in self?.hotKeyPressed() }
+        HotkeySettings.shared.activate(.checkSelection) { [weak self] in self?.checkSelectionPressed() }
         HotkeySettings.shared.activate(.clipboard) { [weak self] in self?.clipboardHotKeyPressed(keptOpen: false) }
         HotkeySettings.shared.activate(.clipboardKept) { [weak self] in self?.clipboardHotKeyPressed(keptOpen: true) }
         ClipboardHistory.shared.start()
@@ -195,6 +202,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     /// ⇧⌘X opens it kept open, for pasting several items. The same shortcut
     /// again closes it; the other one switches the popup to its mode.
     private func clipboardHotKeyPressed(keptOpen: Bool) {
+        quickCheck.close()
         if clipboardPanel.isShown, ClipboardHistory.shared.keepsPopupOpen == keptOpen {
             clipboardPanel.close()
             return
@@ -203,7 +211,41 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         clipboardPanel.show(keptOpen: keptOpen)
     }
     
+    /// ⌥⇧Space: checks the spelling of the text selected in the frontmost
+    /// app on a card beside the pointer, with fixes that replace the
+    /// selection. With nothing selected it opens Check Spelling.
+    private func checkSelectionPressed() {
+        if quickCheck.isShown {
+            quickCheck.close()
+            return
+        }
+        if popover.isShown {
+            hidePopover()
+            return
+        }
+        quickLookup.close()
+        if !clipboardPanel.isKeptOpen { clipboardPanel.close() }
+        guard !isReadingSelection else { return }
+        isReadingSelection = true
+        Task {
+            let result = await SelectionReader.selectedText()
+            isReadingSelection = false
+            switch result {
+                case .text(let text):
+                    quickCheck.show(text: text)
+                case .needsPermission:
+                    SelectionReader.requestPermission()
+                    model.mode = .check
+                    showPopover()
+                case .noSelection:
+                    model.mode = .check
+                    showPopover()
+            }
+        }
+    }
+    
     private func hotKeyPressed() {
+        quickCheck.close()
         if !clipboardPanel.isKeptOpen { clipboardPanel.close() }
         if quickLookup.isShown {
             quickLookup.close()
@@ -241,6 +283,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private func showPopover() {
         guard let button = statusItem?.button else { return }
         quickLookup.close()
+        quickCheck.close()
         
         NSApp.activate(ignoringOtherApps: true)
         applyTheme()  // the menu bar's own appearance mustn't win
@@ -299,10 +342,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let command = event.modifierFlags.intersection(.deviceIndependentFlagsMask) == .command
         switch event.keyCode {
             case 18 where command:  // ⌘1
-                model.mode = .lookUp
+                model.mode = .check
+                checker.requestFocus()
                 return true
             case 19 where command:  // ⌘2
-                model.mode = .check
+                model.mode = .lookUp
+                model.requestSearchFocus()
                 return true
             case 20 where command:  // ⌘3
                 model.mode = .calculate

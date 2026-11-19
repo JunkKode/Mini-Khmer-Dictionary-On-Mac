@@ -77,6 +77,9 @@
 		AB1E00000000000051EC7014 /* Hotkeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB1D00000000000051EC7014 /* Hotkeys.swift */; };
 		AB1E00000000000051EC7015 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB1D00000000000051EC7015 /* SettingsView.swift */; };
 		AB1E00000000000051EC7016 /* SettingsWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB1D00000000000051EC7016 /* SettingsWindow.swift */; };
+		AB1E00000000000051EC701E /* QuickCheckModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB1D00000000000051EC701E /* QuickCheckModel.swift */; };
+		AB1E00000000000051EC701F /* QuickCheckCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB1D00000000000051EC701F /* QuickCheckCard.swift */; };
+		AB1E00000000000051EC7020 /* QuickCheckPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB1D00000000000051EC7020 /* QuickCheckPanel.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -176,6 +179,9 @@
 		AB1D00000000000051EC7014 /* Hotkeys.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Hotkeys.swift; sourceTree = "<group>"; };
 		AB1D00000000000051EC7015 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		AB1D00000000000051EC7016 /* SettingsWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsWindow.swift; sourceTree = "<group>"; };
+		AB1D00000000000051EC701E /* QuickCheckModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickCheckModel.swift; sourceTree = "<group>"; };
+		AB1D00000000000051EC701F /* QuickCheckCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickCheckCard.swift; sourceTree = "<group>"; };
+		AB1D00000000000051EC7020 /* QuickCheckPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickCheckPanel.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -290,6 +296,7 @@
 				04E0E0FF30AC331F005E59E6 /* Grid */,
 				04E0E10030AC331F005E59E6 /* CalculatorModel.swift */,
 				04E0E10130AC331F005E59E6 /* CalendarModel.swift */,
+				AB1D00000000000051EC701E /* QuickCheckModel.swift */,
 				AB1D00000000000051EC700A /* ClipboardHistory.swift */,
 				AB1D00000000000051EC7000 /* QuickLookupModel.swift */,
 				04E0E10230AC331F005E59E6 /* DictionaryEntry.swift */,
@@ -315,6 +322,7 @@
 			isa = PBXGroup;
 			children = (
 				04E0E10C30AC331F005E59E6 /* AppDelegate.swift */,
+				AB1D00000000000051EC7020 /* QuickCheckPanel.swift */,
 				AB1D00000000000051EC7016 /* SettingsWindow.swift */,
 				AB1D00000000000051EC7014 /* Hotkeys.swift */,
 				AB1D00000000000051EC700D /* ClipboardPanel.swift */,
@@ -352,6 +360,7 @@
 				04E0E11C30AC331F005E59E6 /* CalendarView.swift */,
 				04E0E11D30AC331F005E59E6 /* CopyToastView.swift */,
 				04E0E11E30AC331F005E59E6 /* DetailPane.swift */,
+				AB1D00000000000051EC701F /* QuickCheckCard.swift */,
 				AB1D00000000000051EC7015 /* SettingsView.swift */,
 				AB1D00000000000051EC700B /* ClipboardHistoryView.swift */,
 				AB1D00000000000051EC7001 /* QuickLookupCard.swift */,
@@ -516,6 +525,7 @@
 				04E0E13F30AC331F005E59E6 /* Workbook.swift in Sources */,
 				04E0E14030AC331F005E59E6 /* CalculatorModel.swift in Sources */,
 				04E0E14130AC331F005E59E6 /* CalendarModel.swift in Sources */,
+				AB1E00000000000051EC701E /* QuickCheckModel.swift in Sources */,
 				AB1E00000000000051EC700A /* ClipboardHistory.swift in Sources */,
 				AB1E00000000000051EC7000 /* QuickLookupModel.swift in Sources */,
 				04E0E14230AC331F005E59E6 /* DictionaryEntry.swift in Sources */,
@@ -526,6 +536,7 @@
 				04E0E14730AC331F005E59E6 /* RomanizedSearch.swift in Sources */,
 				04E0E14830AC331F005E59E6 /* SpellCheckModel.swift in Sources */,
 				04E0E14930AC331F005E59E6 /* AppDelegate.swift in Sources */,
+				AB1E00000000000051EC7020 /* QuickCheckPanel.swift in Sources */,
 				AB1E00000000000051EC7016 /* SettingsWindow.swift in Sources */,
 				AB1E00000000000051EC7014 /* Hotkeys.swift in Sources */,
 				AB1E00000000000051EC700D /* ClipboardPanel.swift in Sources */,
@@ -548,6 +559,7 @@
 				04E0E15730AC331F005E59E6 /* CalendarView.swift in Sources */,
 				04E0E15830AC331F005E59E6 /* CopyToastView.swift in Sources */,
 				04E0E15930AC331F005E59E6 /* DetailPane.swift in Sources */,
+				AB1E00000000000051EC701F /* QuickCheckCard.swift in Sources */,
 				AB1E00000000000051EC7015 /* SettingsView.swift in Sources */,
 				AB1E00000000000051EC700B /* ClipboardHistoryView.swift in Sources */,
 				AB1E00000000000051EC7001 /* QuickLookupCard.swift in Sources */,

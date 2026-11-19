@@ -11,8 +11,8 @@ Search accepts Khmer script or Latin letters — `bong` finds បង, `domlai` a
 
 | Tab | ⌘ | What it does |
 | --- | --- | --- |
-| Look Up | 1 | Search in Khmer or Latin letters; how common each word is, words that often follow it, Saved and Recent lists, a word of the day |
-| Check Spelling | 2 | Underlines mistakes with ranked fixes; suggests the word you're typing (⇥ to accept) |
+| Check Spelling | 1 | Underlines mistakes with ranked fixes; suggests the word you're typing (⇥ to accept). The popover opens on this tab |
+| Look Up | 2 | Search in Khmer or Latin letters; how common each word is, words that often follow it, Saved and Recent lists, a word of the day |
 | Calculator | 3 | Simple keypad, Smart formulas, and a Grid with Excel-style copy/paste and a fill handle |
 | Calendar | 4 | A month in both calendars: lunar days, holy days (moons) and public holidays, checked against Google |
 | Currency | 5 | Converts one amount — or a mix like `$12 + 5000៛` — into several currencies at once, with a grey `1,000,000` preview while you type; drag a row by its flag to reorder, right-click to delete; editable rates or **Update Online** |
@@ -37,6 +37,22 @@ clipboard back. Pressing keys for you needs the Accessibility permission
 first time you use ⌥Space; until it's given, the menu bar icon's right-click
 menu has **Allow ⌥Space to Look Up Selected Text…**. The code is in
 `Support/SelectionReader.swift` and `Support/QuickLookupPanel.swift`.
+
+### Check spelling of selected text
+
+Select Khmer text in any app and press **⌥⇧Space**: a card shows it with a
+**red** line under words the dictionary can't explain and a **blue** line
+under words whose fix is known (common misspellings such as តំលៃ → តម្លៃ,
+letters typed in another order, ្ត for ្ដ). Click a fix, or ⏎ for the
+highlighted word's first fix; **Fix All** takes every blue word's first fix.
+**Replace Selection** (⌘⏎) puts the corrected text in place of what you
+selected and then restores your clipboard. Ignore (⌘I) skips a word for now;
+Add to Dictionary accepts it from then on, here and in Check Spelling. With
+nothing selected, the shortcut opens Check Spelling.
+
+macOS has no way for this app to underline Khmer as you type in other apps:
+macOS 27 doesn't load spell checkers from other developers, so Khmer never
+appears among its spelling languages.
 
 ### Clipboard history
 
@@ -68,7 +84,7 @@ that gets in the way.
 ### Settings
 
 **Settings…** (⌘, in the popover, the menu bar icon's right-click menu, or the
-gear in the clipboard popup) changes the three shortcuts: click one and press the
+gear in the clipboard popup) changes the four shortcuts: click one and press the
 new keys. A shortcut needs ⌘, ⌥ or ⌃ (or a function key), can't be one every
 app uses such as ⌘C, and is refused if another app already holds it. Each
 can also be turned off or reset. Settings also switches clipboard history on
@@ -131,7 +147,7 @@ count up.
 
 ## Spell checking
 
-The **Check Spelling** tab (⌘2) checks Khmer text against the dictionary. Khmer
+The **Check Spelling** tab (⌘1) checks Khmer text against the dictionary. Khmer
 has no spaces between words, so each run of text is first split into the fewest
 dictionary words that cover it, and whatever can't be covered is flagged.
 Problems are underlined in red (not in the dictionary) or orange (typed in a

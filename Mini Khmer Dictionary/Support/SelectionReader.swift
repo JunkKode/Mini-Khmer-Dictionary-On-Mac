@@ -89,6 +89,28 @@ enum SelectionReader {
         }
     }
 
+    /// Types `text` over the selection in the frontmost app by pasting it,
+    /// then puts the user's clipboard back as it was. Kept out of the
+    /// clipboard history.
+    static func replaceSelection(with text: String) async {
+        guard hasPermission else { return }
+        await waitForModifierRelease()
+        ClipboardHistory.shared.pause()
+        defer { ClipboardHistory.shared.resume() }
+
+        let pasteboard = NSPasteboard.general
+        let saved = snapshot(of: pasteboard)
+        pasteboard.clearContents()
+        pasteboard.setString(text, forType: .string)
+        // Let the app take the keyboard back from the card first.
+        try? await Task.sleep(for: .milliseconds(60))
+        pressPaste()
+        // The app reads the pasteboard when it handles ⌘V; wait before
+        // restoring it.
+        try? await Task.sleep(for: .milliseconds(350))
+        restore(saved, to: pasteboard)
+    }
+
     /// Presses ⌘V in the frontmost app. Needs the same permission.
     static func pressPaste() {
         pressCommand(CGKeyCode(9))  // kVK_ANSI_V
